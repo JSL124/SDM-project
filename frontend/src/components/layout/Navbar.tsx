@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import LoginModal from '@/components/ui/LoginModal';
@@ -19,9 +20,9 @@ export default function Navbar() {
       <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           {/* Logo */}
-          <a href="/" className="text-2xl font-bold text-gray-900">
+          <Link href="/" className="text-2xl font-bold text-gray-900">
             Fund<span className="text-brand">Raise</span>
-          </a>
+          </Link>
 
           {/* Desktop nav links */}
           <div className="hidden items-center gap-8 md:flex">

@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, AnchorHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
 
 type ButtonProps = {
   variant?: 'primary' | 'outline';
