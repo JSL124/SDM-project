@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 
 interface ScrollExpandMediaProps {
@@ -128,10 +129,12 @@ export default function ScrollExpandMedia({
               className="h-full w-full object-cover"
             />
           ) : (
-            <img
+            <Image
               src={mediaSrc}
               alt={title}
-              className="h-full w-full object-cover"
+              fill
+              sizes="100vw"
+              className="object-cover"
             />
           )}
         </div>

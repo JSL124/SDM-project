@@ -218,6 +218,7 @@ Use Test-Driven Development:
 
 - Write test cases BEFORE implementation
 - Use Jest + ts-jest for backend testing
+- Use Jest + React Testing Library for frontend Boundary testing
 - Include test scenarios for:
   - Valid input (success path)
   - Invalid input
@@ -227,6 +228,16 @@ Use Test-Driven Development:
   - Server/connection error cases
 - Test plan, test cases, unit test cases, and test data must be documented
 - Controller and Entity must be testable independently (separated from HTTP layer)
+- Boundary tests MUST verify validation, HTTP request behavior, and success/error display without calling Entity directly
+- For login, the automated test set MUST cover:
+  - No message before submit
+  - Empty email
+  - Invalid email format
+  - Empty password
+  - Account does not exist
+  - Invalid password
+  - Backend unavailable
+  - Successful login
 
 ## 13. CI/CD Requirements
 
@@ -234,6 +245,24 @@ Use Test-Driven Development:
 - Tests MUST run automatically via GitHub Actions
 - At least one feature must demonstrate full dev-to-deploy CI/CD flow
 - Code must be structured for CI integration
+
+## 13.1 Local Quality Gate (MANDATORY BEFORE PUSH)
+
+Local pass is required before CI:
+
+- Backend-only changes: `cd backend && npm test`
+- Frontend-only changes: `cd frontend && npm run lint && npm test`
+- Login feature changes across BCE layers: run all of the following
+  - `cd backend && npm test`
+  - `cd frontend && npm run lint`
+  - `cd frontend && npm test`
+
+Development workflow MUST follow:
+
+1. Write or update the failing test first
+2. Implement the minimum code to pass
+3. Refactor while keeping tests green
+4. Push only after the relevant local quality gate passes
 
 ## 14. Development Process (MANDATORY)
 
