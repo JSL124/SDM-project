@@ -1,6 +1,16 @@
-# AGENT.md - Coding Guidelines for CSIT314 Project
+# AGENT.md - Repository-Wide Coding Guidelines
 
-## 1. Core Principle
+## 1. Purpose
+
+This file defines repository-wide rules that apply to every feature.
+
+For feature-specific work, check whether a dedicated guide exists under `docs/<feature>/AGENT.md`.
+
+- Login-related work MUST follow `docs/login/AGENT.md`
+- Future feature-specific guides SHOULD follow the same pattern: `docs/<feature>/AGENT.md`
+- If a feature-specific guide adds detail for that feature, follow the root `AGENT.md` for shared rules and the feature guide for feature-specific rules
+
+## 2. Core Principle
 
 All code MUST strictly follow the design artifacts:
 
@@ -20,9 +30,9 @@ There must be 100% consistency between design and code:
 
 If a diagram says `create(name): boolean`, then code MUST have method name `create`, accept parameter `name`, and return `boolean`. If return type is `void`, DO NOT return anything.
 
-`Promise<T>` wrappers are acceptable for async operations, but the underlying type must still match the diagram (e.g., diagram says `boolean` -> code returns `Promise<boolean>`).
+`Promise<T>` wrappers are acceptable for async operations, but the underlying type must still match the diagram (for example, diagram says `boolean` so code may return `Promise<boolean>`).
 
-## 2. Tech Stack
+## 3. Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -36,7 +46,7 @@ If a diagram says `create(name): boolean`, then code MUST have method name `crea
 
 Next.js MUST NOT be used as a fullstack framework. Frontend and backend are separate applications.
 
-## 3. BCE Architecture (MANDATORY)
+## 4. BCE Architecture (MANDATORY)
 
 This project MUST strictly follow BCE (Boundary-Control-Entity) architecture.
 
@@ -47,7 +57,7 @@ Responsible for:
 - UI rendering
 - Capturing user input
 - Input validation (empty fields, format, type)
-- Displaying success/error messages
+- Displaying success or error messages
 
 Boundary MUST NOT:
 
@@ -61,13 +71,13 @@ Boundary MUST:
 
 - Call Controller via HTTP API only
 - Handle form input validation before sending to Controller
-- Display errors passed up from Controller/Entity
+- Display errors passed up from Controller or Entity
 
 ### Controller (Backend - Node.js/TypeScript)
 
 Responsible for:
 
-- Handling one specific use case (one controller per use case)
+- Handling one specific use case
 - Managing application flow
 - Coordinating between Boundary and Entity
 
@@ -75,7 +85,7 @@ Controller MUST:
 
 - Be a TypeScript class
 - Call Entity for all data operations
-- Return results back to the route/boundary
+- Return results back to the route or boundary
 
 Controller MUST NOT:
 
@@ -89,49 +99,37 @@ Controller MUST NOT:
 Responsible for:
 
 - Data modeling
-- Database interaction (CRUD) via `pg` raw SQL
+- Database interaction via `pg` raw SQL
 - Persistence logic
-- Data-layer error handling (DB connection errors, query failures)
+- Data-layer error handling
 
 Entity MUST:
 
 - Be a TypeScript class
-- Use `pg` for direct SQL queries (NO ORM)
+- Use `pg` for direct SQL queries
 - Encapsulate all database access
 
 Entity MUST NOT:
 
-- Display UI or handle HTTP request/response
+- Display UI or handle HTTP request or response
 - Contain alert, popup, or display message logic
 - Contain frontend logic
 
-## 4. Communication Rules (MANDATORY)
+## 5. Communication Rules (MANDATORY)
 
 These rules MUST NEVER be violated:
 
-```
+```text
 Boundary -> HTTP API -> Controller -> Entity -> PostgreSQL
 ```
 
-- Only Boundary interacts with the user/actor directly
-- Boundary calls Controller only (via HTTP API)
+- Only Boundary interacts with the user directly
+- Boundary calls Controller only, via HTTP API
 - Controller calls Entity only
 - Entity calls Database only
-- Errors flow back: Entity -> Controller -> Boundary (Boundary displays)
+- Errors flow back: Entity -> Controller -> Boundary
 - Boundary MUST NOT call another Boundary
 - Controller MUST NOT call Boundary directly
-
-## 5. System Architecture
-
-```text
-[ Next.js (Boundary) ]  -- port 3000
-        ↓ HTTP API
-[ Express + TypeScript Controller ]  -- port 8080
-        ↓
-[ TypeScript Entity ]
-        ↓ pg raw SQL
-[ PostgreSQL ]
-```
 
 ## 6. Validation Placement
 
@@ -146,73 +144,13 @@ If Entity detects an error, it passes it up through Controller to Boundary for d
 
 ## 7. OO Design Rules
 
-- Controller and Entity MUST be TypeScript classes (use `class` keyword)
+- Controller and Entity MUST be TypeScript classes
 - Methods belong in the class they logically relate to
-- Do NOT create unnecessary "Action classes" -- place behavior in the domain/use-case class
-  - Prefer `UserAccount.findAccountByEmail()` over a separate `FindAccountAction` class
+- Do NOT create unnecessary action classes; place behavior in the domain or use-case class
 - Each use case gets its own dedicated Controller class
-  - `LoginController` handles login only
-  - `CreateFRACategoryController` handles category creation only
-  - Do NOT make one giant controller for multiple use cases
+- Do NOT make one giant controller for multiple use cases
 
-## 8. Landing Page Rules
-
-The public landing page is a Boundary-only page and does NOT need a user story.
-
-The landing page MAY:
-
-- Render UI
-- Display static text, media, and animations
-- Handle simple frontend interactions (scrolling, transitions)
-
-The landing page MUST NOT:
-
-- Access database
-- Contain business logic
-- Call Entity directly
-
-The first visible screen MUST show: `Online Fundraiser Platform`
-
-After scrolling, the page MUST display a short description of the platform.
-
-## 9. Feature Scope
-
-### User Admin
-- User profile: create / view / update / suspend / search
-- User account: view / update / suspend / search
-
-### Fundraiser (FR)
-- Fundraising activity CRUDS management
-- Track number of views and number of shortlisted/saved counts for own FSAs
-- Search/view completed FSA history (with service and date filters)
-
-### Donee
-- Fundraising activity: search / view / save to favourite list
-- Search/view within favourite list
-- Donation history and FSA progress: search/view (with category and date filters)
-
-### Platform Management
-- FRA category CRUDS
-- Daily / weekly / monthly report generation
-
-## 10. Count Logic
-
-When a donee views a fundraising activity:
-- View count increments (tracked in Entity/DB)
-
-When a donee saves a fundraising activity to favourites:
-- Shortlist/save count increments (tracked in Entity/DB)
-
-These counts MUST be visible to the Fundraiser who owns the activity.
-
-## 11. Test Data Requirements
-
-- Each entity type needs approximately 100 records of test data
-- Seed scripts go in `backend/sql/` directory
-- Scripts may use random generation
-- Final demo MUST use this test data for live demonstration
-
-## 12. TDD Requirements (MANDATORY)
+## 8. TDD Requirements (MANDATORY)
 
 Use Test-Driven Development:
 
@@ -220,42 +158,30 @@ Use Test-Driven Development:
 - Use Jest + ts-jest for backend testing
 - Use Jest + React Testing Library for frontend Boundary testing
 - Include test scenarios for:
-  - Valid input (success path)
+  - Valid input
   - Invalid input
-  - Missing/empty fields
+  - Missing or empty fields
   - Duplicate cases
   - Not found cases
-  - Server/connection error cases
+  - Server or connection error cases
 - Test plan, test cases, unit test cases, and test data must be documented
-- Controller and Entity must be testable independently (separated from HTTP layer)
-- Boundary tests MUST verify validation, HTTP request behavior, and success/error display without calling Entity directly
-- For login, the automated test set MUST cover:
-  - No message before submit
-  - Empty email
-  - Invalid email format
-  - Empty password
-  - Account does not exist
-  - Invalid password
-  - Backend unavailable
-  - Successful login
+- Controller and Entity must be testable independently from the HTTP layer
+- Boundary tests MUST verify validation, HTTP request behavior, and success or error display without calling Entity directly
 
-## 13. CI/CD Requirements
+## 9. CI/CD Requirements
 
 - Every feature MUST be testable
 - Tests MUST run automatically via GitHub Actions
 - At least one feature must demonstrate full dev-to-deploy CI/CD flow
 - Code must be structured for CI integration
 
-## 13.1 Local Quality Gate (MANDATORY BEFORE PUSH)
+## 10. Local Quality Gate (MANDATORY BEFORE PUSH)
 
 Local pass is required before CI:
 
 - Backend-only changes: `cd backend && npm test`
 - Frontend-only changes: `cd frontend && npm run lint && npm test`
-- Login feature changes across BCE layers: run all of the following
-  - `cd backend && npm test`
-  - `cd frontend && npm run lint`
-  - `cd frontend && npm test`
+- Cross-layer feature changes: run the relevant backend and frontend validation commands before push
 
 Development workflow MUST follow:
 
@@ -264,26 +190,23 @@ Development workflow MUST follow:
 3. Refactor while keeping tests green
 4. Push only after the relevant local quality gate passes
 
-## 14. Development Process (MANDATORY)
+## 11. Development Process (MANDATORY)
 
 Per user story, follow this order:
 
-1. Define Wireframe (UI fields)
+1. Define Wireframe
 2. Define Use Case
 3. Define BCE Diagram
 4. Define Sequence Diagram
 5. Define Class Diagram
-6. Write Test Cases FIRST (TDD)
-7. Implement:
-   - Boundary (Next.js)
-   - Controller (TypeScript class)
-   - Entity (TypeScript class + SQL)
+6. Write Test Cases first
+7. Implement Boundary, Controller, and Entity
 8. Run tests
 9. Verify consistency with all diagrams
 
-Implement ONE user story at a time. Fully complete (design + frontend + backend + tests) before moving to next.
+Implement ONE user story at a time. Fully complete design, frontend, backend, and tests before moving to the next.
 
-## 15. Naming & Consistency Rules
+## 12. Naming and Consistency Rules
 
 - Do NOT rename anything between design and code
 - No variations like `userId` vs `user_id` vs `UserID`
@@ -297,52 +220,22 @@ Implement ONE user story at a time. Fully complete (design + frontend + backend 
   - Class diagram method names
   - Actual code method names and return types
 
-## 16. Agile / Sprint Approach
-
-- Development follows sprint-based agile methodology
-- 3-5 sprints expected, each producing a working increment
-- Do NOT follow a pure waterfall (analysis -> design -> implementation) approach
-- Use backlog and task management (Taiga or similar)
-
-## 17. Backend Project Structure
-
-```
-backend/
-  package.json
-  tsconfig.json
-  .env.example
-  src/
-    index.ts              # Express entry point (port 8080)
-    db.ts                 # pg Pool + query helper
-    controller/           # One class per use case
-    entity/               # One class per domain object
-    routes/               # Express routers (thin HTTP adapters)
-  test/
-    controller/           # Jest tests for controllers
-    entity/               # Jest tests for entities
-  sql/
-    001-create-tables.sql
-    002-seed-test-data.sql
-```
-
-Routes are thin HTTP adapters, NOT a BCE layer. They only map HTTP requests to Controller method calls.
-
-## 18. Simplicity Rule
+## 13. Simplicity Rule
 
 - Prefer simple TypeScript classes over complex frameworks
-- NO ORM -- use `pg` with raw SQL only
+- NO ORM; use `pg` with raw SQL only
 - Avoid unnecessary abstraction
 - Follow OO design strictly
-- Do NOT build entire system at once
+- Do NOT build the entire system at once
 - Do NOT mix multiple user stories in one implementation
 
-## 19. Critical Warning
+## 14. Critical Warning
 
 Any violation of:
 
 - BCE separation
 - Design-code consistency
-- Communication rules (Boundary->Controller->Entity->DB)
+- Communication rules
 - TDD workflow
 
 is considered a project rule violation and MUST be corrected before the implementation is accepted.

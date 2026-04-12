@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand: #00b964;
+  --color-brand-hover: #00a358;
+  --color-brand-light: #e6f9f0;
+}
+
 :root {
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-mono: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
@@ -13,4 +19,9 @@ body {
 code,
 pre {
   font-family: var(--font-mono);
+
+}
+
+html {
+  scroll-behavior: smooth;
 }
