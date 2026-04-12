@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+frontend/.env
+frontend/.env.local
+!backend/.env.example
+
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build output
+dist/
+backend/dist/
+build/
+coverage/
+.next/
+frontend/.next/
+out/
+
+# Tooling
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+

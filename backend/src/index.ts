@@ -2,8 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import loginRoutes from './routes/loginRoutes';
+import { getDbConnectionSummary, query } from './db';
 
-dotenv.config();
+dotenv.config({ override: true });
 
 const app = express();
 app.use(cors());
@@ -11,6 +12,20 @@ app.use(express.json());
 app.use(loginRoutes);
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+async function start() {
+  try {
+    console.log('Database config:', getDbConnectionSummary());
+    await query('SELECT 1');
+    console.log('Database connection verified.');
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to connect to database on startup:', error);
+    process.exit(1);
+  }
+}
+
+void start();

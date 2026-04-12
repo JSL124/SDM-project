@@ -9,6 +9,6 @@
 --   cd backend && npx tsx scripts/hash-passwords.ts
 
 INSERT INTO user_account (email, password_hash, account_status) VALUES
-  ('active.fundraiser@example.com',    '$2b$10$placeholder_hash_for_Fundraiser123!',  'ACTIVE'),
-  ('wrongpass.fundraiser@example.com', '$2b$10$placeholder_hash_for_CorrectPass123!', 'ACTIVE'),
-  ('disabled.fundraiser@example.com',  '$2b$10$placeholder_hash_for_Disabled123!',    'DISABLED');
+  ('active.fundraiser@example.com',    '$2b$10$jSmRG6vlzmy20Z8GyFxmB.wCh5byKZgOjpaSIOPwJse0zX1ENIuoO',  'ACTIVE'),
+  ('wrongpass.fundraiser@example.com', '$2b$10$E/zQKuGsL9Vc1aG0jYB9Xuro7rOrgBUt3H8HdOjNpcxN1nNNwSVGC', 'ACTIVE'),
+  ('disabled.fundraiser@example.com',  '$2b$10$7UrWmgDNAZrnNH.6kPqc9.dzc8YL9LzkG5BDPuooetd7nJP1QZk4e', 'DISABLED');

@@ -14,7 +14,8 @@ router.post('/api/login', async (req: Request, res: Response) => {
     }
 
     res.status(401).json(result);
-  } catch {
+  } catch (error) {
+    console.error('Login request failed:', error);
     res.status(500).json({ success: false, message: 'Unable to connect to server.' });
   }
 });
