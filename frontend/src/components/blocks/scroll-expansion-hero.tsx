@@ -142,7 +142,7 @@ export default function ScrollExpandMedia({
           style={{
             opacity: contentOpacity,
             transform: `translateY(${(1 - contentPhase) * 40}px)`,
-            maxHeight: '40vh',
+            maxHeight: '75vh',
             pointerEvents: contentOpacity < 0.1 ? 'none' : 'auto',
           }}
         >

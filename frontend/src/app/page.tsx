@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import ScrollExpandMedia from '@/components/blocks/scroll-expansion-hero';
+import LoginSection from '@/components/blocks/login-section';
 
 const platformContent = {
   mediaSrc:
@@ -33,6 +34,13 @@ function PlatformDescription() {
   );
 }
 
+function scrollToLogin() {
+  window.scrollTo({
+    top: document.documentElement.scrollHeight,
+    behavior: 'smooth',
+  });
+}
+
 export default function Home() {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -40,6 +48,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      {/* Top-right Login button */}
+      <button
+        onClick={scrollToLogin}
+        className="fixed right-6 top-6 z-50 rounded-full border border-white/30 bg-white/10 px-6 py-2 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20"
+      >
+        Log In
+      </button>
+
       <ScrollExpandMedia
         mediaType="image"
         mediaSrc={platformContent.mediaSrc}
@@ -49,6 +65,7 @@ export default function Home() {
         scrollToExpand={platformContent.scrollToExpand}
         textBlend
       >
+        <LoginSection />
         <PlatformDescription />
       </ScrollExpandMedia>
     </div>
