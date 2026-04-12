@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import loginRoutes from './routes/loginRoutes';
+import logoutRoutes from './routes/logoutRoutes';
 import { getDbConnectionSummary, query } from './db';
 
 dotenv.config({ override: true });
@@ -10,6 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(loginRoutes);
+app.use(logoutRoutes);
 
 const PORT = process.env.PORT || 8080;
 

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import LoginModal from '@/components/ui/LoginModal';
+import { logout, displayLoginPage } from '@/feature/logout/boundary/LogoutBoundary';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -13,6 +14,11 @@ export default function Navbar() {
   function handleLoginSuccess(email: string): void {
     setUserEmail(email);
     setLoginOpen(false);
+  }
+
+  async function handleLogout(): Promise<void> {
+    await logout();
+    displayLoginPage(() => setUserEmail(null));
   }
 
   return (
@@ -49,6 +55,14 @@ export default function Navbar() {
               </button>
             )}
             <Button size="sm">Start a Fundraiser</Button>
+            {userEmail && (
+              <button
+                onClick={handleLogout}
+                className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+              >
+                Logout
+              </button>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -90,6 +104,14 @@ export default function Navbar() {
                 </button>
               )}
               <Button size="sm" className="w-full">Start a Fundraiser</Button>
+              {userEmail && (
+                <button
+                  onClick={() => { handleLogout(); setMenuOpen(false); }}
+                  className="rounded-md px-3 py-1.5 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                >
+                  Logout
+                </button>
+              )}
             </div>
           </div>
         )}
