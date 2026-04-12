@@ -36,18 +36,20 @@ export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModal
 
       {/* Modal content */}
       <div className="relative z-10 w-full max-w-md px-4">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute -top-2 right-2 z-20 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-600"
-          aria-label="Close"
-        >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <div className="relative">
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute right-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            aria-label="Close"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
 
-        <LoginBoundary onLoginSuccess={onLoginSuccess} />
+          <LoginBoundary onLoginSuccess={onLoginSuccess} />
+        </div>
       </div>
     </div>
   );
