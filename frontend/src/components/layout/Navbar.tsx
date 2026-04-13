@@ -14,30 +14,44 @@ type LoggedInUser = {
   role?: string;
 };
 
+type SuccessBanner = {
+  isOpen: boolean;
+  message: string;
+};
+
 export default function Navbar() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
-  const [showLogoutBanner, setShowLogoutBanner] = useState(false);
+  const [successBanner, setSuccessBanner] = useState<SuccessBanner>({ isOpen: false, message: '' });
   const [bannerVisible, setBannerVisible] = useState(false);
 
   useEffect(() => {
-    if (!showLogoutBanner) return;
+    if (!successBanner.isOpen) return;
     // Trigger slide-down on next frame
     requestAnimationFrame(() => setBannerVisible(true));
     // Start slide-up after 3s
     const timer = setTimeout(() => setBannerVisible(false), 3000);
     return () => clearTimeout(timer);
-  }, [showLogoutBanner]);
+  }, [successBanner.isOpen]);
 
   const displayName = loggedInUser?.username?.trim() || loggedInUser?.email.split('@')[0]?.trim() || '';
   const avatarLetter = (displayName[0] ?? loggedInUser?.email[0] ?? '?').toUpperCase();
 
+  function showSuccessBanner(message: string): void {
+    setBannerVisible(false);
+    setSuccessBanner({
+      isOpen: true,
+      message,
+    });
+  }
+
   function handleLoginSuccess(user: LoggedInUser): void {
     setLoggedInUser(user);
     setLoginOpen(false);
+    showSuccessBanner('You have successfully signed in to FundRaise.');
   }
 
   async function handleLogout(): Promise<void> {
@@ -46,7 +60,7 @@ export default function Navbar() {
       setMenuOpen(false);
       setProfileMenuOpen(false);
       displayLoginPage(() => setLoggedInUser(null));
-      setShowLogoutBanner(true);
+      showSuccessBanner('You have successfully signed out of FundRaise.');
       router.push('/');
     }
   }
@@ -287,7 +301,7 @@ export default function Navbar() {
         )}
       </nav>
 
-      {showLogoutBanner && (
+      {successBanner.isOpen && (
         <div
           className="overflow-hidden transition-all duration-500 ease-in-out"
           style={{
@@ -295,12 +309,14 @@ export default function Navbar() {
             opacity: bannerVisible ? 1 : 0,
           }}
           onTransitionEnd={() => {
-            if (!bannerVisible) setShowLogoutBanner(false);
+            if (!bannerVisible) {
+              setSuccessBanner({ isOpen: false, message: '' });
+            }
           }}
         >
           <div className="border-b border-green-200 bg-brand-light px-6 py-3 text-center text-sm text-gray-700">
             <span className="mr-2">✓</span>
-            You have successfully signed out of FundRaise.
+            {successBanner.message}
           </div>
         </div>
       )}

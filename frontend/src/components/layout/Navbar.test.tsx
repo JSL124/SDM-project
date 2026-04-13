@@ -87,6 +87,7 @@ describe('Navbar', () => {
     const user = await logInThroughNavbar();
     const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
 
+    expect(screen.getByText('You have successfully signed in to FundRaise.')).toBeInTheDocument();
     expect(profileTrigger).toHaveTextContent('J');
     expect(profileTrigger).toHaveTextContent('jason04');
 
@@ -133,6 +134,7 @@ describe('Navbar', () => {
 
     expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Open profile menu for jason04' })).not.toBeInTheDocument();
+    expect(screen.getByText('You have successfully signed out of FundRaise.')).toBeInTheDocument();
   });
 
   it('keeps the user logged in when logout fails', async () => {

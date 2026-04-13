@@ -107,21 +107,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
     void submitLogin(email, password);
   }
 
-  const message = status.submitted ? status.result?.message : '';
-
-  if (status.result?.success) {
-    return (
-      <div className="mx-auto w-full max-w-md rounded-2xl bg-white px-8 py-10 text-center shadow-xl">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
-          <svg className="h-7 w-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <p className="mt-4 text-lg font-semibold text-gray-900">Login successful.</p>
-        <p className="mt-2 text-sm text-gray-500">Redirecting to dashboard...</p>
-      </div>
-    );
-  }
+  const message = status.submitted && !status.result?.success ? status.result?.message : '';
 
   return (
     <div className="mx-auto w-full max-w-md rounded-2xl bg-white px-8 py-10 shadow-xl">
@@ -161,12 +147,6 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
           />
         </div>
 
-        <div className="text-right">
-          <a href="#" className="text-sm font-medium text-brand hover:text-brand-hover">
-            Forgot password?
-          </a>
-        </div>
-
         {message ? (
           <div className="rounded-lg bg-red-50 px-4 py-3">
             <p className="text-sm text-red-600">{message}</p>
@@ -181,13 +161,6 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
         </button>
       </form>
 
-      {/* Sign up link */}
-      <p className="mt-6 text-center text-sm text-gray-500">
-        Don&apos;t have an account?{' '}
-        <a href="#" className="font-medium text-brand hover:text-brand-hover">
-          Sign up
-        </a>
-      </p>
     </div>
   );
 }

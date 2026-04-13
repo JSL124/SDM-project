@@ -6,7 +6,7 @@ import LoginBoundary from '@/feature/login/boundary/LoginBoundary';
 interface LoginModalProps {
   open: boolean;
   onClose: () => void;
-  onLoginSuccess: (user: { email: string; username?: string }) => void;
+  onLoginSuccess: (user: { email: string; username?: string; role?: string }) => void;
 }
 
 export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModalProps) {

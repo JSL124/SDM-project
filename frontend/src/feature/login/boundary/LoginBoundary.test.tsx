@@ -24,6 +24,9 @@ describe('LoginBoundary', () => {
     expect(screen.queryByText('Please enter a valid email address.')).not.toBeInTheDocument();
     expect(screen.queryByText('Please enter your password.')).not.toBeInTheDocument();
     expect(screen.queryByText('Login successful.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Forgot password?')).not.toBeInTheDocument();
+    expect(screen.queryByText("Don't have an account?")).not.toBeInTheDocument();
+    expect(screen.queryByText('Sign up')).not.toBeInTheDocument();
   });
 
   it('blocks submission when email is empty', async () => {
@@ -112,7 +115,7 @@ describe('LoginBoundary', () => {
     expect(await screen.findByText('Unable to connect to server.')).toBeInTheDocument();
   });
 
-  it('sends the expected payload and renders the dashboard on success', async () => {
+  it('sends the expected payload without rendering an inline success screen', async () => {
     const user = userEvent.setup();
     fetchMock.mockResolvedValue({
       ok: true,
@@ -141,7 +144,10 @@ describe('LoginBoundary', () => {
       });
     });
 
-    expect(await screen.findByText('Redirecting to dashboard...')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Login successful.')).not.toBeInTheDocument();
+      expect(screen.queryByText('Redirecting to dashboard...')).not.toBeInTheDocument();
+    });
     expect(localStorage.getItem('userRole')).toBe('Fundraiser');
   });
 
