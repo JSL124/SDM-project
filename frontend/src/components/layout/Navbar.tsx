@@ -17,8 +17,10 @@ export default function Navbar() {
   }
 
   async function handleLogout(): Promise<void> {
-    await logout();
-    displayLoginPage(() => setUserEmail(null));
+    const didLogout = await logout();
+    if (didLogout) {
+      displayLoginPage(() => setUserEmail(null));
+    }
   }
 
   return (
@@ -106,7 +108,7 @@ export default function Navbar() {
               <Button size="sm" className="w-full">Start a Fundraiser</Button>
               {userEmail && (
                 <button
-                  onClick={() => { handleLogout(); setMenuOpen(false); }}
+                  onClick={async () => { await handleLogout(); setMenuOpen(false); }}
                   className="rounded-md px-3 py-1.5 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
                   Logout

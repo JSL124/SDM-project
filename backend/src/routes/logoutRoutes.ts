@@ -5,8 +5,8 @@ const router = Router();
 const logoutController = new LogoutController();
 
 router.post('/api/logout', (req: Request, res: Response) => {
-  const result = logoutController.logout();
-  res.json(result);
+  const success = logoutController.logout();
+  res.json({ success });
 });
 
 export default router;

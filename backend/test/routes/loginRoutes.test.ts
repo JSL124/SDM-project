@@ -1,4 +1,6 @@
 describe('loginRoutes', () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
   async function loadHandler(loginResult: unknown, shouldReject = false) {
     jest.resetModules();
     jest.doMock('../../src/login/controller/LoginController', () => ({
@@ -32,6 +34,11 @@ describe('loginRoutes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
   });
 
   it('returns 200 for successful login', async () => {
@@ -101,5 +108,9 @@ describe('loginRoutes', () => {
       success: false,
       message: 'Unable to connect to server.',
     });
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Login request failed:',
+      expect.any(Error)
+    );
   });
 });
