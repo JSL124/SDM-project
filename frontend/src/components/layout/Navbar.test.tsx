@@ -120,7 +120,7 @@ describe('Navbar', () => {
 
   it('shows Sign In again after successful logout', async () => {
     logoutMock.mockResolvedValue(true);
-    const user = await logInThroughNavbar();
+    await logInThroughNavbar();
     const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
 
     fireEvent.focus(profileTrigger);
@@ -139,7 +139,7 @@ describe('Navbar', () => {
 
   it('keeps the user logged in when logout fails', async () => {
     logoutMock.mockResolvedValue(false);
-    const user = await logInThroughNavbar();
+    await logInThroughNavbar();
     const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
 
     fireEvent.focus(profileTrigger);
