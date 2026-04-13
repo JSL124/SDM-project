@@ -6,6 +6,7 @@ Verify that the create user profile user story satisfies the BCE design, validat
 ## Test Scope
 Included:
 - Boundary input validation
+- HTTP route response mapping
 - Controller create profile decision logic
 - Entity email existence check
 - Entity profile save operation

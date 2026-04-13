@@ -148,7 +148,7 @@ describe('CreateProfilePage', () => {
       ok: true,
       json: async () => ({
         success: true,
-        message: 'Profile Created',
+        message: 'Profile created successfully.',
       }),
     });
 
@@ -173,6 +173,6 @@ describe('CreateProfilePage', () => {
       });
     });
 
-    expect(await screen.findByText('Profile Created')).toBeInTheDocument();
+    expect(await screen.findByText('Profile created successfully.')).toBeInTheDocument();
   });
 });

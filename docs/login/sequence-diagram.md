@@ -34,7 +34,8 @@ sequenceDiagram
                 LoginPage-->>Fundraiser: Display "Invalid password."
             else Password valid
                 LoginController-->>LoginPage: { success: true, message: "Login successful." }
-                LoginPage-->>Fundraiser: Display dashboard
+                LoginPage->>LoginPage: displayLoginSuccess()
+                LoginPage-->>Fundraiser: Display login success message
             end
         end
     end

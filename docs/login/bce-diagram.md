@@ -6,7 +6,7 @@ classDiagram
         <<Boundary>>
         +submitLogin(email: String, password: String) void
         +validateInput(email: String, password: String) boolean
-        +displayDashboard() void
+        +displayLoginSuccess() void
         +displayError(message: String) void
     }
 

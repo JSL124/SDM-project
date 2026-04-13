@@ -61,13 +61,25 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop nav links */}
-          <div className="hidden items-center gap-8 md:flex">
-            <a href="#categories" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-              Discover
-            </a>
-            <a href="#how-it-works" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-              How It Works
-            </a>
+          <div className="hidden items-center gap-14 md:flex">
+            <button type="button" className="flex items-center gap-1.5 text-[15px] font-medium text-gray-600 hover:text-gray-900">
+              <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+              </svg>
+              <span>Search</span>
+            </button>
+            <button type="button" className="flex items-center gap-1 text-[15px] font-medium text-gray-600 hover:text-gray-900">
+              <span>Donate</span>
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <button type="button" className="flex items-center gap-1 text-[15px] font-medium text-gray-600 hover:text-gray-900">
+              <span>Fundraise</span>
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
           </div>
 
           {/* Desktop actions */}
@@ -119,8 +131,13 @@ export default function Navbar() {
                     </svg>
                   </button>
 
-                  {profileMenuOpen ? (
-                    <div className="absolute right-0 top-full z-50 pt-3">
+                  <div
+                    className={`absolute right-0 top-full z-50 pt-3 transition-all duration-200 ease-out ${
+                      profileMenuOpen
+                        ? 'pointer-events-auto translate-y-0 opacity-100'
+                        : 'pointer-events-none -translate-y-2 opacity-0'
+                    }`}
+                  >
                     <div className="absolute inset-x-0 -top-3 h-3" aria-hidden="true" />
                     <div
                       className="w-[250px] rounded-[30px] border border-gray-100 bg-white px-4 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.12)]"
@@ -161,7 +178,6 @@ export default function Navbar() {
                         </div>
                       </div>
                     </div>
-                  ) : null}
                 </div>
               </>
             ) : (
@@ -194,12 +210,24 @@ export default function Navbar() {
         {menuOpen && (
           <div className="border-t border-gray-100 px-6 pb-4 md:hidden">
             <div className="flex flex-col gap-3 pt-3">
-              <a href="#categories" className="text-sm font-medium text-gray-600" onClick={() => setMenuOpen(false)}>
-                Discover
-              </a>
-              <a href="#how-it-works" className="text-sm font-medium text-gray-600" onClick={() => setMenuOpen(false)}>
-                How It Works
-              </a>
+              <button type="button" className="flex items-center gap-1 text-left text-sm font-medium text-gray-600" onClick={() => setMenuOpen(false)}>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                </svg>
+                <span>Search</span>
+              </button>
+              <button type="button" className="flex items-center gap-1 text-left text-sm font-medium text-gray-600" onClick={() => setMenuOpen(false)}>
+                <span>Donate</span>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <button type="button" className="flex items-center gap-1 text-left text-sm font-medium text-gray-600" onClick={() => setMenuOpen(false)}>
+                <span>Fundraise</span>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
               {loggedInUser ? (
                 <>
                   <button

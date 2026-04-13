@@ -4,20 +4,21 @@
 UC-PROFILE-01
 
 ## Goal
-Allow a user admin to create a new user profile by entering the user's personal details into the system.
+Allow a User Admin to create a new user profile by entering the user's personal details into the system.
 
 ## Primary Actor
 User Admin
 
 ## Supporting Components
 - `CreateProfilePage` as the boundary at `frontend/src/feature/profile/boundary/CreateProfilePage.tsx`
+- `POST /api/profile` as the HTTP API route at `backend/src/routes/profileRoutes.ts`
 - `ProfileController` as the controller at `backend/src/profile/controller/ProfileController.ts`
 - `UserProfile` as the entity at `backend/src/profile/entity/UserProfile.ts`
 - `user_profile` table in PostgreSQL
 
 ## Preconditions
-- The user admin needs to be logged in.
-- The user admin needs to have permission to manage users.
+- The User Admin needs to be logged in.
+- The User Admin needs to have permission to manage users.
 - The user account does not already exist.
 
 ## Postconditions
@@ -30,4 +31,4 @@ Failure:
 - An appropriate error message is displayed on the create profile page.
 
 ## Trigger
-The user admin selects the "Create User Profile" option from the system interface.
+The User Admin selects the "Create User Profile" option from the system interface.

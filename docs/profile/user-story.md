@@ -7,7 +7,7 @@ US-PROFILE-01
 Create User Profile
 
 ## User Story
-As a user admin, I want to create a new user profile by filling up the user's personal details so that the user's information is stored in the system.
+As a User Admin, I want to create a new user profile by entering the user's personal details so that the user's information is stored in the system.
 
 ## Business Value
 - Enables user admins to onboard new users into the platform.
@@ -28,6 +28,7 @@ As a user admin, I want to create a new user profile by filling up the user's pe
 Included:
 - Create profile form rendering
 - Client-side input validation
+- HTTP API route invocation
 - Profile controller invocation
 - Email uniqueness check in PostgreSQL
 - Profile data persistence

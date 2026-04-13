@@ -22,11 +22,6 @@ type ProfileStatus = {
   result: ProfileResult | null;
 };
 
-const initialStatus: ProfileStatus = {
-  submitted: false,
-  result: null,
-};
-
 export default function CreateProfilePage() {
   const router = useRouter();
   const authorized = useSyncExternalStore(subscribeToStorage, getIsAuthorized, () => false);
@@ -34,10 +29,14 @@ export default function CreateProfilePage() {
   const [email, setEmail] = useState('');
   const [phoneNum, setPhoneNum] = useState('');
   const [address, setAddress] = useState('');
-  const [status, setStatus] = useState<ProfileStatus>(initialStatus);
+  const [status, setStatus] = useState<ProfileStatus>({
+    submitted: false,
+    result: null,
+  });
   const [successVisible, setSuccessVisible] = useState(false);
 
   const isSuccess = status.result?.success;
+  const message = status.submitted ? status.result?.message : '';
 
   useEffect(() => {
     if (!isSuccess) return;
@@ -145,8 +144,6 @@ export default function CreateProfilePage() {
     );
   }
 
-  const message = status.submitted ? status.result?.message : '';
-
   if (isSuccess) {
     return (
       <div
@@ -163,7 +160,7 @@ export default function CreateProfilePage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <p className="mt-6 text-2xl font-bold text-gray-900">Profile Created</p>
+          <p className="mt-6 text-2xl font-bold text-gray-900">{message}</p>
           <p className="mt-2 text-sm text-gray-500">Redirecting to management page...</p>
         </div>
       </div>

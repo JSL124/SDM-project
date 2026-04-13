@@ -58,7 +58,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
     });
   }
 
-  function displayDashboard(username?: string, role?: string): void {
+  function displayLoginSuccess(username?: string, role?: string): void {
     setStatus({
       submitted: true,
       result: {
@@ -91,7 +91,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
         if (data.role) {
           localStorage.setItem('userRole', data.role);
         }
-        displayDashboard(data.username, data.role);
+        displayLoginSuccess(data.username, data.role);
         return;
       }
 

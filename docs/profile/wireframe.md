@@ -4,7 +4,7 @@
 Create Profile Page
 
 ## Purpose
-Allow a user admin to enter a new user's personal details and submit the profile for creation.
+Allow a User Admin to enter a new user's personal details and submit the profile for creation.
 
 ## Main UI Elements
 - Page title: `Create User Profile`
