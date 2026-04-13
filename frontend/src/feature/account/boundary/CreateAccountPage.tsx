@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useSyncExternalStore, type FormEvent } from 'react';
+import { useState, useEffect, useSyncExternalStore, type FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 
 const ROLES = ['Fundraiser', 'Donee', 'User admin', 'Platform manager'] as const;
 
@@ -29,12 +30,29 @@ function getIsAuthorized(): boolean {
 }
 
 export default function CreateAccountPage() {
+  const router = useRouter();
   const authorized = useSyncExternalStore(subscribeToStorage, getIsAuthorized, () => false);
   const [profileId, setProfileId] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
   const [status, setStatus] = useState<AccountStatus>(initialStatus);
+  const [successVisible, setSuccessVisible] = useState(false);
+
+  const isSuccess = status.result?.success;
+
+  useEffect(() => {
+    if (!isSuccess) return;
+    requestAnimationFrame(() => setSuccessVisible(true));
+    const timer = setTimeout(() => setSuccessVisible(false), 2000);
+    return () => clearTimeout(timer);
+  }, [isSuccess]);
+
+  function handleSuccessExit() {
+    if (!successVisible && isSuccess) {
+      router.push('/admin/manage-users');
+    }
+  }
 
   function validateInput(profileId: string, username: string, password: string, role: string): boolean {
     if (!profileId.trim()) {
@@ -124,17 +142,26 @@ export default function CreateAccountPage() {
   }
 
   const message = status.submitted ? status.result?.message : '';
-  const isSuccess = status.result?.success;
 
   if (isSuccess) {
     return (
-      <div className="mx-auto w-full max-w-md rounded-2xl bg-white px-8 py-10 text-center shadow-xl">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
-          <svg className="h-7 w-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
+      <div
+        className="transition-all duration-700 ease-out"
+        style={{
+          opacity: successVisible ? 1 : 0,
+          transform: successVisible ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(16px)',
+        }}
+        onTransitionEnd={handleSuccessExit}
+      >
+        <div className="mx-auto w-full max-w-lg rounded-3xl bg-white px-10 py-14 text-center shadow-2xl">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+            <svg className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="mt-6 text-2xl font-bold text-gray-900">Account Created</p>
+          <p className="mt-2 text-sm text-gray-500">Redirecting to management page...</p>
         </div>
-        <p className="mt-4 text-lg font-semibold text-gray-900">Account created successfully.</p>
       </div>
     );
   }

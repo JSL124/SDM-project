@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import LoginModal from '@/components/ui/LoginModal';
 import { logout, displayLoginPage } from '@/feature/logout/boundary/LogoutBoundary';
 
@@ -10,13 +11,26 @@ const profileMenuItems = ['Profile', 'Your impact', 'Account settings'] as const
 type LoggedInUser = {
   email: string;
   username?: string;
+  role?: string;
 };
 
 export default function Navbar() {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
+  const [showLogoutBanner, setShowLogoutBanner] = useState(false);
+  const [bannerVisible, setBannerVisible] = useState(false);
+
+  useEffect(() => {
+    if (!showLogoutBanner) return;
+    // Trigger slide-down on next frame
+    requestAnimationFrame(() => setBannerVisible(true));
+    // Start slide-up after 3s
+    const timer = setTimeout(() => setBannerVisible(false), 3000);
+    return () => clearTimeout(timer);
+  }, [showLogoutBanner]);
 
   const displayName = loggedInUser?.username?.trim() || loggedInUser?.email.split('@')[0]?.trim() || '';
   const avatarLetter = (displayName[0] ?? loggedInUser?.email[0] ?? '?').toUpperCase();
@@ -29,8 +43,11 @@ export default function Navbar() {
   async function handleLogout(): Promise<void> {
     const didLogout = await logout();
     if (didLogout) {
+      setMenuOpen(false);
       setProfileMenuOpen(false);
       displayLoginPage(() => setLoggedInUser(null));
+      setShowLogoutBanner(true);
+      router.push('/');
     }
   }
 
@@ -121,7 +138,16 @@ export default function Navbar() {
                             {item}
                           </button>
                         ))}
-                          <button
+                        {loggedInUser.role === 'User admin' ? (
+                          <Link
+                            href="/admin/manage-users"
+                            className="rounded-2xl px-3 py-5 text-left text-[17px] font-medium text-gray-900 transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                            role="menuitem"
+                          >
+                            Admin
+                          </Link>
+                        ) : null}
+                        <button
                           type="button"
                           onMouseDown={(event) => {
                             event.preventDefault();
@@ -202,6 +228,15 @@ export default function Navbar() {
                       {item}
                     </button>
                   ))}
+                  {loggedInUser.role === 'User admin' ? (
+                    <Link
+                      href="/admin/manage-users"
+                      className="rounded-md px-3 py-1.5 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Admin
+                    </Link>
+                  ) : null}
                 </>
               ) : (
                 <button
@@ -223,6 +258,24 @@ export default function Navbar() {
           </div>
         )}
       </nav>
+
+      {showLogoutBanner && (
+        <div
+          className="overflow-hidden transition-all duration-500 ease-in-out"
+          style={{
+            maxHeight: bannerVisible ? '60px' : '0px',
+            opacity: bannerVisible ? 1 : 0,
+          }}
+          onTransitionEnd={() => {
+            if (!bannerVisible) setShowLogoutBanner(false);
+          }}
+        >
+          <div className="border-b border-green-200 bg-brand-light px-6 py-3 text-center text-sm text-gray-700">
+            <span className="mr-2">✓</span>
+            You have successfully signed out of FundRaise.
+          </div>
+        </div>
+      )}
 
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} onLoginSuccess={handleLoginSuccess} />
     </>

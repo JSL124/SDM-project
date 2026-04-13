@@ -20,7 +20,7 @@ const initialStatus: LoginStatus = {
 };
 
 interface LoginBoundaryProps {
-  onLoginSuccess?: (user: { email: string; username?: string }) => void;
+  onLoginSuccess?: (user: { email: string; username?: string; role?: string }) => void;
 }
 
 export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
@@ -58,7 +58,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
     });
   }
 
-  function displayDashboard(username?: string): void {
+  function displayDashboard(username?: string, role?: string): void {
     setStatus({
       submitted: true,
       result: {
@@ -66,7 +66,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
         message: 'Login successful.',
       },
     });
-    onLoginSuccess?.({ email, username });
+    onLoginSuccess?.({ email, username, role });
   }
 
   async function submitLogin(email: string, password: string): Promise<void> {
@@ -91,7 +91,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
         if (data.role) {
           localStorage.setItem('userRole', data.role);
         }
-        displayDashboard(data.username);
+        displayDashboard(data.username, data.role);
         return;
       }
 

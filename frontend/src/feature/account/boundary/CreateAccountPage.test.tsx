@@ -2,6 +2,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateAccountPage from './CreateAccountPage';
 
+const mockPush = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
 type MockAccountResponse = {
   ok: boolean;
   json: () => Promise<{ success: boolean; message: string }>;
@@ -12,6 +17,7 @@ describe('CreateAccountPage', () => {
 
   beforeEach(() => {
     fetchMock.mockReset();
+    mockPush.mockReset();
     global.fetch = fetchMock as unknown as typeof fetch;
     localStorage.clear();
     localStorage.setItem('userRole', 'User admin');
@@ -22,7 +28,7 @@ describe('CreateAccountPage', () => {
 
     expect(screen.queryByText('Please enter a profile ID.')).not.toBeInTheDocument();
     expect(screen.queryByText('Username already exists.')).not.toBeInTheDocument();
-    expect(screen.queryByText('Account created successfully.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Account Created')).not.toBeInTheDocument();
   });
 
   it('shows access denied when user is not User admin', () => {
@@ -116,7 +122,7 @@ describe('CreateAccountPage', () => {
       ok: true,
       json: async () => ({
         success: true,
-        message: 'Account created successfully.',
+        message: 'Account Created',
       }),
     });
 
@@ -128,7 +134,7 @@ describe('CreateAccountPage', () => {
     await user.selectOptions(screen.getByLabelText('Role'), 'Fundraiser');
     await user.click(screen.getByRole('button', { name: 'Create' }));
 
-    expect(await screen.findByText('Account created successfully.')).toBeInTheDocument();
+    expect(await screen.findByText('Account Created')).toBeInTheDocument();
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith('http://localhost:8080/api/account', {

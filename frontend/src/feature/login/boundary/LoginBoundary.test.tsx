@@ -166,6 +166,7 @@ describe('LoginBoundary', () => {
     await waitFor(() => {
       expect(onLoginSuccess).toHaveBeenCalledWith({
         email: 'jason21888@naver.com',
+        role: 'Fundraiser',
         username: 'jason04',
       });
     });

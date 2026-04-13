@@ -2,6 +2,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateProfilePage from './CreateProfilePage';
 
+const mockPush = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
 type MockProfileResponse = {
   ok: boolean;
   json: () => Promise<{ success: boolean; message: string }>;
@@ -12,6 +17,7 @@ describe('CreateProfilePage', () => {
 
   beforeEach(() => {
     fetchMock.mockReset();
+    mockPush.mockReset();
     global.fetch = fetchMock as unknown as typeof fetch;
     localStorage.clear();
     localStorage.setItem('userRole', 'User admin');
@@ -30,7 +36,7 @@ describe('CreateProfilePage', () => {
 
     expect(screen.queryByText('Please enter a name.')).not.toBeInTheDocument();
     expect(screen.queryByText('Please enter an email.')).not.toBeInTheDocument();
-    expect(screen.queryByText('Profile created successfully.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Profile Created')).not.toBeInTheDocument();
   });
 
   it('blocks submission when name is empty', async () => {
@@ -142,7 +148,7 @@ describe('CreateProfilePage', () => {
       ok: true,
       json: async () => ({
         success: true,
-        message: 'Profile created successfully.',
+        message: 'Profile Created',
       }),
     });
 
@@ -167,6 +173,6 @@ describe('CreateProfilePage', () => {
       });
     });
 
-    expect(await screen.findByText('Profile created successfully.')).toBeInTheDocument();
+    expect(await screen.findByText('Profile Created')).toBeInTheDocument();
   });
 });
