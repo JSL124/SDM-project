@@ -1,7 +1,7 @@
 import { UserAccount } from '../entity/UserAccount';
 
 export type LoginResult =
-  | { success: true; message: 'Login successful.' }
+  | { success: true; message: 'Login successful.'; role: string; username: string }
   | { success: false; message: 'Account does not exist.' }
   | { success: false; message: 'Invalid password.' };
 
@@ -26,6 +26,8 @@ export class LoginController {
     return {
       success: true,
       message: 'Login successful.',
+      role: account.getRole(),
+      username: account.getUsername(),
     };
   }
 }

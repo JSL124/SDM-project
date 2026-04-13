@@ -7,6 +7,7 @@ This file defines repository-wide rules that apply to every feature.
 For feature-specific work, check whether a dedicated guide exists under `docs/<feature>/AGENT.md`.
 
 - Login-related work MUST follow `docs/login/AGENT.md`
+- Create account related work MUST follow `docs/account/AGENT.md`
 - Future feature-specific guides SHOULD follow the same pattern: `docs/<feature>/AGENT.md`
 - If a feature-specific guide adds detail for that feature, follow the root `AGENT.md` for shared rules and the feature guide for feature-specific rules
 

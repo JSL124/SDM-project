@@ -5,6 +5,8 @@ import { useState, type FormEvent } from 'react';
 type LoginBoundaryResult = {
   success: boolean;
   message: string;
+  role?: string;
+  username?: string;
 };
 
 type LoginStatus = {
@@ -18,7 +20,7 @@ const initialStatus: LoginStatus = {
 };
 
 interface LoginBoundaryProps {
-  onLoginSuccess?: (email: string) => void;
+  onLoginSuccess?: (user: { email: string; username?: string }) => void;
 }
 
 export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
@@ -56,7 +58,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
     });
   }
 
-  function displayDashboard(): void {
+  function displayDashboard(username?: string): void {
     setStatus({
       submitted: true,
       result: {
@@ -64,7 +66,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
         message: 'Login successful.',
       },
     });
-    onLoginSuccess?.(email);
+    onLoginSuccess?.({ email, username });
   }
 
   async function submitLogin(email: string, password: string): Promise<void> {
@@ -86,7 +88,10 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
 
       const data = (await response.json()) as LoginBoundaryResult;
       if (response.ok && data.success) {
-        displayDashboard();
+        if (data.role) {
+          localStorage.setItem('userRole', data.role);
+        }
+        displayDashboard(data.username);
         return;
       }
 

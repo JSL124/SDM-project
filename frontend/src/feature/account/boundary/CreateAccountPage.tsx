@@ -2,6 +2,23 @@
 
 import { useState, useSyncExternalStore, type FormEvent } from 'react';
 
+const ROLES = ['Fundraiser', 'Donee', 'User admin', 'Platform manager'] as const;
+
+type AccountResult = {
+  success: boolean;
+  message: string;
+};
+
+type AccountStatus = {
+  submitted: boolean;
+  result: AccountResult | null;
+};
+
+const initialStatus: AccountStatus = {
+  submitted: false,
+  result: null,
+};
+
 function subscribeToStorage(callback: () => void) {
   window.addEventListener('storage', callback);
   return () => window.removeEventListener('storage', callback);
@@ -11,53 +28,32 @@ function getIsAuthorized(): boolean {
   return localStorage.getItem('userRole') === 'User admin';
 }
 
-type ProfileResult = {
-  success: boolean;
-  message: string;
-};
-
-type ProfileStatus = {
-  submitted: boolean;
-  result: ProfileResult | null;
-};
-
-const initialStatus: ProfileStatus = {
-  submitted: false,
-  result: null,
-};
-
-export default function CreateProfilePage() {
+export default function CreateAccountPage() {
   const authorized = useSyncExternalStore(subscribeToStorage, getIsAuthorized, () => false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phoneNum, setPhoneNum] = useState('');
-  const [address, setAddress] = useState('');
-  const [status, setStatus] = useState<ProfileStatus>(initialStatus);
+  const [profileId, setProfileId] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('');
+  const [status, setStatus] = useState<AccountStatus>(initialStatus);
 
-  function validateInput(name: string, email: string, phoneNum: string, address: string): boolean {
-    if (!name.trim()) {
-      displayError('Please enter a name.');
+  function validateInput(profileId: string, username: string, password: string, role: string): boolean {
+    if (!profileId.trim()) {
+      displayError('Please enter a profile ID.');
       return false;
     }
 
-    if (!email.trim()) {
-      displayError('Please enter an email.');
+    if (!username.trim()) {
+      displayError('Please enter a username.');
       return false;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      displayError('Please enter a valid email address.');
+    if (!password.trim()) {
+      displayError('Please enter a password.');
       return false;
     }
 
-    if (!phoneNum.trim()) {
-      displayError('Please enter a phone number.');
-      return false;
-    }
-
-    if (!address.trim()) {
-      displayError('Please enter an address.');
+    if (!role) {
+      displayError('Please select a role.');
       return false;
     }
 
@@ -69,7 +65,7 @@ export default function CreateProfilePage() {
       submitted: true,
       result: {
         success: true,
-        message: 'Profile created successfully.',
+        message: 'Account created successfully.',
       },
     });
   }
@@ -84,19 +80,19 @@ export default function CreateProfilePage() {
     });
   }
 
-  async function submitProfile(name: string, email: string, phoneNum: string, address: string): Promise<void> {
-    if (!validateInput(name, email, phoneNum, address)) {
+  async function submitUserAccount(profileId: string, username: string, password: string, role: string): Promise<void> {
+    if (!validateInput(profileId, username, password, role)) {
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/profile', {
+      const response = await fetch('http://localhost:8080/api/account', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phoneNum, address }),
+        body: JSON.stringify({ profileId, username, password, role }),
       });
 
-      const data = (await response.json()) as ProfileResult;
+      const data = (await response.json()) as AccountResult;
       if (response.ok && data.success) {
         displaySuccess();
         return;
@@ -110,7 +106,7 @@ export default function CreateProfilePage() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    void submitProfile(name, email, phoneNum, address);
+    void submitUserAccount(profileId, username, password, role);
   }
 
   if (!authorized) {
@@ -122,7 +118,7 @@ export default function CreateProfilePage() {
           </svg>
         </div>
         <p className="mt-4 text-lg font-semibold text-gray-900">Access Denied</p>
-        <p className="mt-2 text-sm text-gray-500">Only User Admins can create profiles.</p>
+        <p className="mt-2 text-sm text-gray-500">Only User Admins can create accounts.</p>
       </div>
     );
   }
@@ -138,73 +134,78 @@ export default function CreateProfilePage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <p className="mt-4 text-lg font-semibold text-gray-900">Profile created successfully.</p>
+        <p className="mt-4 text-lg font-semibold text-gray-900">Account created successfully.</p>
       </div>
     );
   }
 
   return (
     <div className="mx-auto w-full max-w-md rounded-2xl bg-white px-8 py-10 shadow-xl">
-      <h2 className="text-center text-2xl font-bold text-gray-900">Create User Profile</h2>
+      <h2 className="text-center text-2xl font-bold text-gray-900">Create User Account</h2>
       <p className="mt-2 text-center text-sm text-gray-500">
-        Enter the new user&apos;s details below
+        Enter the new user&apos;s account details below
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
         <div>
-          <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-gray-700">
-            Name
+          <label htmlFor="profileId" className="mb-1.5 block text-sm font-medium text-gray-700">
+            Profile ID
           </label>
           <input
-            id="name"
+            id="profileId"
             type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Enter name"
+            value={profileId}
+            onChange={(event) => setProfileId(event.target.value)}
+            placeholder="Enter profile ID"
             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">
-            Email
+          <label htmlFor="username" className="mb-1.5 block text-sm font-medium text-gray-700">
+            Username
           </label>
           <input
-            id="email"
+            id="username"
             type="text"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="Enter email"
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            placeholder="Enter username"
             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           />
         </div>
 
         <div>
-          <label htmlFor="phoneNum" className="mb-1.5 block text-sm font-medium text-gray-700">
-            Phone Number
+          <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-gray-700">
+            Password
           </label>
           <input
-            id="phoneNum"
-            type="text"
-            value={phoneNum}
-            onChange={(event) => setPhoneNum(event.target.value)}
-            placeholder="Enter phone number"
+            id="password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Enter password"
             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           />
         </div>
 
         <div>
-          <label htmlFor="address" className="mb-1.5 block text-sm font-medium text-gray-700">
-            Address
+          <label htmlFor="role" className="mb-1.5 block text-sm font-medium text-gray-700">
+            Role
           </label>
-          <input
-            id="address"
-            type="text"
-            value={address}
-            onChange={(event) => setAddress(event.target.value)}
-            placeholder="Enter address"
-            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-          />
+          <select
+            id="role"
+            value={role}
+            onChange={(event) => setRole(event.target.value)}
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          >
+            <option value="">Select a role</option>
+            {ROLES.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
         </div>
 
         {message ? (

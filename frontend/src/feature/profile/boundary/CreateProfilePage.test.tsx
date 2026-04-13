@@ -13,6 +13,16 @@ describe('CreateProfilePage', () => {
   beforeEach(() => {
     fetchMock.mockReset();
     global.fetch = fetchMock as unknown as typeof fetch;
+    localStorage.clear();
+    localStorage.setItem('userRole', 'User admin');
+  });
+
+  it('shows access denied when user is not User admin', () => {
+    localStorage.setItem('userRole', 'Fundraiser');
+    render(<CreateProfilePage />);
+
+    expect(screen.getByText('Access Denied')).toBeInTheDocument();
+    expect(screen.getByText('Only User Admins can create profiles.')).toBeInTheDocument();
   });
 
   it('shows no message before submit', () => {

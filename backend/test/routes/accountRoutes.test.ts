@@ -1,18 +1,18 @@
-describe('loginRoutes', () => {
+describe('accountRoutes', () => {
   let consoleErrorSpy: jest.SpyInstance;
 
-  async function loadHandler(loginResult: unknown, shouldReject = false) {
+  async function loadHandler(createAccountResult: unknown, shouldReject = false) {
     jest.resetModules();
-    jest.doMock('../../src/login/controller/LoginController', () => ({
-      LoginController: jest.fn().mockImplementation(() => ({
-        login: shouldReject
+    jest.doMock('../../src/account/controller/CreateAccountController', () => ({
+      CreateAccountController: jest.fn().mockImplementation(() => ({
+        createAccount: shouldReject
           ? jest.fn().mockRejectedValue(new Error('db down'))
-          : jest.fn().mockResolvedValue(loginResult),
+          : jest.fn().mockResolvedValue(createAccountResult),
       })),
     }));
 
-    const { default: loginRoutes } = await import('../../src/routes/loginRoutes');
-    return (loginRoutes as any).stack[0].route.stack[0].handle;
+    const { default: accountRoutes } = await import('../../src/routes/accountRoutes');
+    return (accountRoutes as any).stack[0].route.stack[0].handle;
   }
 
   function createResponse() {
@@ -41,20 +41,20 @@ describe('loginRoutes', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it('returns 200 for successful login', async () => {
+  it('returns 200 for successful account creation', async () => {
     const handler = await loadHandler({
       success: true,
-      message: 'Login successful.',
-      role: 'Fundraiser',
-      username: 'jason04',
+      message: 'Account created successfully.',
     });
     const response = createResponse();
 
     await handler(
       {
         body: {
-          email: 'active.fundraiser@example.com',
-          password: 'Fundraiser123!',
+          profileId: '1',
+          username: 'newuser',
+          password: 'Password123!',
+          role: 'Fundraiser',
         },
       },
       response
@@ -63,33 +63,33 @@ describe('loginRoutes', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({
       success: true,
-      message: 'Login successful.',
-      role: 'Fundraiser',
-      username: 'jason04',
+      message: 'Account created successfully.',
     });
   });
 
-  it('returns 401 for account not found', async () => {
+  it('returns 400 when account creation fails', async () => {
     const handler = await loadHandler({
       success: false,
-      message: 'Account does not exist.',
+      message: 'Username already exists.',
     });
     const response = createResponse();
 
     await handler(
       {
         body: {
-          email: 'missing.fundraiser@example.com',
-          password: 'AnyPass123!',
+          profileId: '1',
+          username: 'existinguser',
+          password: 'Password123!',
+          role: 'Donee',
         },
       },
       response
     );
 
-    expect(response.statusCode).toBe(401);
+    expect(response.statusCode).toBe(400);
     expect(response.body).toEqual({
       success: false,
-      message: 'Account does not exist.',
+      message: 'Username already exists.',
     });
   });
 
@@ -100,8 +100,10 @@ describe('loginRoutes', () => {
     await handler(
       {
         body: {
-          email: 'active.fundraiser@example.com',
-          password: 'Fundraiser123!',
+          profileId: '1',
+          username: 'newuser',
+          password: 'Password123!',
+          role: 'User admin',
         },
       },
       response
@@ -113,7 +115,7 @@ describe('loginRoutes', () => {
       message: 'Unable to connect to server.',
     });
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Login request failed:',
+      'Create account request failed:',
       expect.any(Error)
     );
   });

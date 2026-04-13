@@ -13,8 +13,10 @@ describe('LoginController', () => {
   });
 
   it('should return success when email exists and password is correct', async () => {
-    const mockAccount = new UserAccount('active.fundraiser@example.com', 'hash');
+    const mockAccount = new UserAccount('active.fundraiser@example.com', 'jason04', 'hash', 'Fundraiser');
     jest.spyOn(mockAccount, 'verifyPassword').mockResolvedValue(true);
+    jest.spyOn(mockAccount, 'getRole').mockReturnValue('Fundraiser');
+    jest.spyOn(mockAccount, 'getUsername').mockReturnValue('jason04');
     (UserAccount.findAccountByEmail as jest.Mock).mockResolvedValue(mockAccount);
 
     const result = await controller.login('active.fundraiser@example.com', 'Fundraiser123!');
@@ -22,6 +24,8 @@ describe('LoginController', () => {
     expect(result).toEqual({
       success: true,
       message: 'Login successful.',
+      role: 'Fundraiser',
+      username: 'jason04',
     });
     expect(UserAccount.findAccountByEmail).toHaveBeenCalledWith('active.fundraiser@example.com');
     expect(mockAccount.verifyPassword).toHaveBeenCalledWith('Fundraiser123!');
@@ -40,7 +44,7 @@ describe('LoginController', () => {
   });
 
   it('should return invalid password result when password is incorrect', async () => {
-    const mockAccount = new UserAccount('wrongpass.fundraiser@example.com', 'hash');
+    const mockAccount = new UserAccount('wrongpass.fundraiser@example.com', 'jason04', 'hash', 'Fundraiser');
     jest.spyOn(mockAccount, 'verifyPassword').mockResolvedValue(false);
     (UserAccount.findAccountByEmail as jest.Mock).mockResolvedValue(mockAccount);
 

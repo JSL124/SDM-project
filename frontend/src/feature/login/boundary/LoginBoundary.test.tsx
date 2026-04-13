@@ -4,7 +4,7 @@ import LoginBoundary from './LoginBoundary';
 
 type MockLoginResponse = {
   ok: boolean;
-  json: () => Promise<{ success: boolean; message: string }>;
+  json: () => Promise<{ success: boolean; message: string; role?: string; username?: string }>;
 };
 
 describe('LoginBoundary', () => {
@@ -13,6 +13,7 @@ describe('LoginBoundary', () => {
   beforeEach(() => {
     fetchMock.mockReset();
     global.fetch = fetchMock as unknown as typeof fetch;
+    localStorage.clear();
   });
 
   it('shows no message before submit', () => {
@@ -117,6 +118,8 @@ describe('LoginBoundary', () => {
       json: async () => ({
         success: true,
         message: 'Login successful.',
+        role: 'Fundraiser',
+        username: 'jason04',
       }),
     });
 
@@ -138,5 +141,33 @@ describe('LoginBoundary', () => {
     });
 
     expect(await screen.findByText('Redirecting to dashboard...')).toBeInTheDocument();
+    expect(localStorage.getItem('userRole')).toBe('Fundraiser');
+  });
+
+  it('passes the returned username to the login success callback', async () => {
+    const user = userEvent.setup();
+    const onLoginSuccess = jest.fn();
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        message: 'Login successful.',
+        role: 'Fundraiser',
+        username: 'jason04',
+      }),
+    });
+
+    render(<LoginBoundary onLoginSuccess={onLoginSuccess} />);
+
+    await user.type(screen.getByLabelText('Email'), 'jason21888@naver.com');
+    await user.type(screen.getByLabelText('Password'), 'Fundraiser123!');
+    await user.click(screen.getByRole('button', { name: 'Log In' }));
+
+    await waitFor(() => {
+      expect(onLoginSuccess).toHaveBeenCalledWith({
+        email: 'jason21888@naver.com',
+        username: 'jason04',
+      });
+    });
   });
 });

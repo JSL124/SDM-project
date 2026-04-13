@@ -2,24 +2,35 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import Button from '@/components/ui/Button';
 import LoginModal from '@/components/ui/LoginModal';
 import { logout, displayLoginPage } from '@/feature/logout/boundary/LogoutBoundary';
+
+const profileMenuItems = ['Profile', 'Your impact', 'Account settings'] as const;
+
+type LoggedInUser = {
+  email: string;
+  username?: string;
+};
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
 
-  function handleLoginSuccess(email: string): void {
-    setUserEmail(email);
+  const displayName = loggedInUser?.username?.trim() || loggedInUser?.email.split('@')[0]?.trim() || '';
+  const avatarLetter = (displayName[0] ?? loggedInUser?.email[0] ?? '?').toUpperCase();
+
+  function handleLoginSuccess(user: LoggedInUser): void {
+    setLoggedInUser(user);
     setLoginOpen(false);
   }
 
   async function handleLogout(): Promise<void> {
     const didLogout = await logout();
     if (didLogout) {
-      displayLoginPage(() => setUserEmail(null));
+      setProfileMenuOpen(false);
+      displayLoginPage(() => setLoggedInUser(null));
     }
   }
 
@@ -43,26 +54,96 @@ export default function Navbar() {
           </div>
 
           {/* Desktop actions */}
-          <div className="hidden items-center gap-4 md:flex">
-            {userEmail ? (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-semibold text-white">
-                {userEmail[0].toUpperCase()}
-              </div>
+          <div className="hidden items-center gap-6 md:flex">
+            {loggedInUser ? (
+              <>
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-[17px] font-medium text-gray-700 transition-colors hover:text-gray-900 focus:outline-none"
+                >
+                  <span>About</span>
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div
+                  className="relative pb-3"
+                  onMouseEnter={() => setProfileMenuOpen(true)}
+                  onMouseLeave={() => setProfileMenuOpen(false)}
+                  onFocus={() => setProfileMenuOpen(true)}
+                  onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                      setProfileMenuOpen(false);
+                    }
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="flex h-12 items-center gap-2 rounded-full bg-[#f2f2f5] px-2 pr-3 text-sm text-gray-900 transition-colors hover:bg-[#ebebf0] focus:bg-[#ebebf0] focus:outline-none"
+                    aria-haspopup="menu"
+                    aria-expanded={profileMenuOpen}
+                    aria-label={`Open profile menu for ${displayName || 'user'}`}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#168fe3] text-[15px] font-semibold text-white">
+                      {avatarLetter}
+                    </div>
+                    {displayName ? (
+                      <span className="max-w-28 truncate text-[17px] font-normal tracking-tight text-gray-800">{displayName}</span>
+                    ) : null}
+                    <svg
+                      className={`h-4 w-4 text-gray-700 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {profileMenuOpen ? (
+                    <div className="absolute right-0 top-full z-50 pt-3">
+                    <div className="absolute inset-x-0 -top-3 h-3" aria-hidden="true" />
+                    <div
+                      className="w-[250px] rounded-[30px] border border-gray-100 bg-white px-4 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.12)]"
+                      role="menu"
+                      aria-label="Profile menu"
+                    >
+                      <div className="flex flex-col">
+                        {profileMenuItems.map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            className="rounded-2xl px-3 py-5 text-left text-[17px] font-medium text-gray-900 transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                            role="menuitem"
+                          >
+                            {item}
+                          </button>
+                        ))}
+                          <button
+                          type="button"
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            void handleLogout();
+                          }}
+                          className="rounded-2xl px-3 py-5 text-left text-[17px] font-medium text-gray-900 transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                          role="menuitem"
+                        >
+                          Sign out
+                        </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              </>
             ) : (
               <button
                 onClick={() => setLoginOpen(true)}
                 className="text-sm font-medium text-gray-600 hover:text-gray-900"
               >
                 Sign In
-              </button>
-            )}
-            <Button size="sm">Start a Fundraiser</Button>
-            {userEmail && (
-              <button
-                onClick={handleLogout}
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
-              >
-                Logout
               </button>
             )}
           </div>
@@ -93,10 +174,35 @@ export default function Navbar() {
               <a href="#how-it-works" className="text-sm font-medium text-gray-600" onClick={() => setMenuOpen(false)}>
                 How It Works
               </a>
-              {userEmail ? (
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-semibold text-white">
-                  {userEmail[0].toUpperCase()}
-                </div>
+              {loggedInUser ? (
+                <>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 rounded-md py-1 text-left text-sm font-medium text-gray-700"
+                  >
+                    <span>About</span>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div className="flex items-center gap-3 rounded-2xl bg-gray-50 px-3 py-2">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#168fe3] text-sm font-semibold text-white">
+                      {avatarLetter}
+                    </div>
+                    {displayName ? (
+                      <span className="text-base font-normal text-gray-900">{displayName}</span>
+                    ) : null}
+                  </div>
+                  {profileMenuItems.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      className="rounded-md px-3 py-1.5 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </>
               ) : (
                 <button
                   onClick={() => { setLoginOpen(true); setMenuOpen(false); }}
@@ -105,13 +211,12 @@ export default function Navbar() {
                   Sign In
                 </button>
               )}
-              <Button size="sm" className="w-full">Start a Fundraiser</Button>
-              {userEmail && (
+              {loggedInUser && (
                 <button
                   onClick={async () => { await handleLogout(); setMenuOpen(false); }}
                   className="rounded-md px-3 py-1.5 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
-                  Logout
+                  Sign out
                 </button>
               )}
             </div>

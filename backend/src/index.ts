@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import loginRoutes from './routes/loginRoutes';
 import logoutRoutes from './routes/logoutRoutes';
 import profileRoutes from './routes/profileRoutes';
+import accountRoutes from './routes/accountRoutes';
 import { getDbConnectionSummary, query } from './db';
 
 dotenv.config({ override: true });
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(loginRoutes);
 app.use(logoutRoutes);
 app.use(profileRoutes);
+app.use(accountRoutes);
 
 const PORT = process.env.PORT || 8080;
 

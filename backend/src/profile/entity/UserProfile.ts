@@ -50,4 +50,15 @@ export class UserProfile {
       return false;
     }
   }
+
+  static async findProfileById(profileId: string): Promise<UserProfile | null> {
+    const sql = 'SELECT profile_id, name, email, phone_num, address FROM user_profile WHERE profile_id = $1';
+    const result = await query(sql, [profileId]);
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    const row = result.rows[0];
+    return new UserProfile(row.profile_id, row.name, row.email, row.phone_num, row.address);
+  }
 }

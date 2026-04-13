@@ -15,9 +15,10 @@ describe('UserAccount', () => {
   });
 
   describe('constructor and getters', () => {
-    it('should store email and passwordHash', () => {
-      const account = new UserAccount('test@example.com', 'hashedpw');
+    it('should store email, username, and passwordHash', () => {
+      const account = new UserAccount('test@example.com', 'jason04', 'hashedpw');
       expect(account.getEmail()).toBe('test@example.com');
+      expect(account.getUsername()).toBe('jason04');
       expect(account.getPasswordHash()).toBe('hashedpw');
     });
   });
@@ -25,7 +26,7 @@ describe('UserAccount', () => {
   describe('findAccountByEmail', () => {
     it('should return UserAccount when account exists', async () => {
       mockQuery.mockResolvedValue({
-        rows: [{ email: 'active.fundraiser@example.com', password_hash: '$2b$10$somehash' }],
+        rows: [{ email: 'active.fundraiser@example.com', username: 'jason04', password_hash: '$2b$10$somehash', role: 'Fundraiser' }],
         command: 'SELECT',
         rowCount: 1,
         oid: 0,
@@ -36,9 +37,11 @@ describe('UserAccount', () => {
 
       expect(account).not.toBeNull();
       expect(account!.getEmail()).toBe('active.fundraiser@example.com');
+      expect(account!.getUsername()).toBe('jason04');
       expect(account!.getPasswordHash()).toBe('$2b$10$somehash');
+      expect(account!.getRole()).toBe('Fundraiser');
       expect(mockQuery).toHaveBeenCalledWith(
-        'SELECT email, password_hash FROM user_account WHERE email = $1',
+        'SELECT email, username, password_hash, role FROM user_account WHERE email = $1',
         ['active.fundraiser@example.com']
       );
     });
@@ -61,7 +64,7 @@ describe('UserAccount', () => {
   describe('verifyPassword', () => {
     it('should return true for correct password', async () => {
       const hash = await bcrypt.hash('Fundraiser123!', 10);
-      const account = new UserAccount('test@example.com', hash);
+      const account = new UserAccount('test@example.com', 'jason04', hash);
 
       const result = await account.verifyPassword('Fundraiser123!');
 
@@ -70,7 +73,7 @@ describe('UserAccount', () => {
 
     it('should return false for incorrect password', async () => {
       const hash = await bcrypt.hash('Fundraiser123!', 10);
-      const account = new UserAccount('test@example.com', hash);
+      const account = new UserAccount('test@example.com', 'jason04', hash);
 
       const result = await account.verifyPassword('WrongPassword!');
 
