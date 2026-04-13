@@ -17,7 +17,11 @@ type LoggedInUser = {
 type SuccessBanner = {
   isOpen: boolean;
   message: string;
+  durationMs: number;
 };
+
+const LOGIN_SUCCESS_BANNER_MS = 4500;
+const LOGOUT_SUCCESS_BANNER_MS = 3000;
 
 export default function Navbar() {
   const router = useRouter();
@@ -25,33 +29,34 @@ export default function Navbar() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
-  const [successBanner, setSuccessBanner] = useState<SuccessBanner>({ isOpen: false, message: '' });
+  const [successBanner, setSuccessBanner] = useState<SuccessBanner>({ isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS });
   const [bannerVisible, setBannerVisible] = useState(false);
 
   useEffect(() => {
     if (!successBanner.isOpen) return;
     // Trigger slide-down on next frame
     requestAnimationFrame(() => setBannerVisible(true));
-    // Start slide-up after 3s
-    const timer = setTimeout(() => setBannerVisible(false), 3000);
+    // Start slide-up after the configured duration
+    const timer = setTimeout(() => setBannerVisible(false), successBanner.durationMs);
     return () => clearTimeout(timer);
-  }, [successBanner.isOpen]);
+  }, [successBanner.durationMs, successBanner.isOpen]);
 
   const displayName = loggedInUser?.username?.trim() || loggedInUser?.email.split('@')[0]?.trim() || '';
   const avatarLetter = (displayName[0] ?? loggedInUser?.email[0] ?? '?').toUpperCase();
 
-  function showSuccessBanner(message: string): void {
+  function showSuccessBanner(message: string, durationMs: number): void {
     setBannerVisible(false);
     setSuccessBanner({
       isOpen: true,
       message,
+      durationMs,
     });
   }
 
   function handleLoginSuccess(user: LoggedInUser): void {
     setLoggedInUser(user);
     setLoginOpen(false);
-    showSuccessBanner('You have successfully signed in to FundRaise.');
+    showSuccessBanner('You have successfully signed in to FundRaise.', LOGIN_SUCCESS_BANNER_MS);
   }
 
   async function handleLogout(): Promise<void> {
@@ -60,7 +65,7 @@ export default function Navbar() {
       setMenuOpen(false);
       setProfileMenuOpen(false);
       displayLoginPage(() => setLoggedInUser(null));
-      showSuccessBanner('You have successfully signed out of FundRaise.');
+      showSuccessBanner('You have successfully signed out of FundRaise.', LOGOUT_SUCCESS_BANNER_MS);
       router.push('/');
     }
   }
@@ -310,7 +315,7 @@ export default function Navbar() {
           }}
           onTransitionEnd={() => {
             if (!bannerVisible) {
-              setSuccessBanner({ isOpen: false, message: '' });
+              setSuccessBanner({ isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS });
             }
           }}
         >

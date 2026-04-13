@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import LoginBoundary from '@/feature/login/boundary/LoginBoundary';
 
 interface LoginModalProps {
@@ -9,12 +9,31 @@ interface LoginModalProps {
   onLoginSuccess: (user: { email: string; username?: string; role?: string }) => void;
 }
 
+const ENTER_ANIMATION_DELAY_MS = 20;
+const EXIT_ANIMATION_MS = 250;
+
 export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModalProps) {
+  const [mounted, setMounted] = useState(open);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      setVisible(false);
+      const timer = window.setTimeout(() => setVisible(true), ENTER_ANIMATION_DELAY_MS);
+      return () => window.clearTimeout(timer);
+    }
+
+    setVisible(false);
+    const timer = window.setTimeout(() => setMounted(false), EXIT_ANIMATION_MS);
+    return () => window.clearTimeout(timer);
+  }, [open]);
+
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose();
     }
-    if (open) {
+    if (mounted) {
       document.addEventListener('keydown', handleKey);
       document.body.style.overflow = 'hidden';
     }
@@ -22,20 +41,30 @@ export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModal
       document.removeEventListener('keydown', handleKey);
       document.body.style.overflow = '';
     };
-  }, [open, onClose]);
+  }, [mounted, onClose]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+    <div
+      className={`fixed inset-0 z-[100] flex items-center justify-center transition-opacity duration-300 ease-out ${
+        visible ? 'opacity-100' : 'opacity-0'
+      }`}
+    >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className={`absolute inset-0 backdrop-blur-sm transition-colors duration-300 ease-out ${
+          visible ? 'bg-black/60' : 'bg-black/0'
+        }`}
         onClick={onClose}
       />
 
       {/* Modal content */}
-      <div className="relative z-10 w-full max-w-md px-4">
+      <div
+        className={`relative z-10 w-full max-w-md px-4 transition-all duration-300 ease-out ${
+          visible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-4 scale-[0.98] opacity-0'
+        }`}
+      >
         <div className="relative">
           {/* Close button */}
           <button
