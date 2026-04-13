@@ -164,6 +164,15 @@ export default function Navbar() {
                             Admin
                           </Link>
                         ) : null}
+                        {loggedInUser.role === 'Fundraiser' ? (
+                          <Link
+                            href="/fundraiser/manage-activities"
+                            className="rounded-2xl px-3 py-5 text-left text-[17px] font-medium text-gray-900 transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                            role="menuitem"
+                          >
+                            My Activities
+                          </Link>
+                        ) : null}
                         <button
                           type="button"
                           onMouseDown={(event) => {
@@ -263,6 +272,15 @@ export default function Navbar() {
                       onClick={() => setMenuOpen(false)}
                     >
                       Admin
+                    </Link>
+                  ) : null}
+                  {loggedInUser.role === 'Fundraiser' ? (
+                    <Link
+                      href="/fundraiser/manage-activities"
+                      className="rounded-md px-3 py-1.5 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      My Activities
                     </Link>
                   ) : null}
                 </>
