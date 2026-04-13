@@ -17,16 +17,28 @@ export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModal
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    let mountTimer: number | undefined;
+    let enterTimer: number | undefined;
+    let exitTimer: number | undefined;
+    let unmountTimer: number | undefined;
+
     if (open) {
-      setMounted(true);
-      setVisible(false);
-      const timer = window.setTimeout(() => setVisible(true), ENTER_ANIMATION_DELAY_MS);
-      return () => window.clearTimeout(timer);
+      mountTimer = window.setTimeout(() => {
+        setMounted(true);
+        setVisible(false);
+        enterTimer = window.setTimeout(() => setVisible(true), ENTER_ANIMATION_DELAY_MS);
+      }, 0);
+    } else {
+      exitTimer = window.setTimeout(() => setVisible(false), 0);
+      unmountTimer = window.setTimeout(() => setMounted(false), EXIT_ANIMATION_MS);
     }
 
-    setVisible(false);
-    const timer = window.setTimeout(() => setMounted(false), EXIT_ANIMATION_MS);
-    return () => window.clearTimeout(timer);
+    return () => {
+      if (mountTimer) window.clearTimeout(mountTimer);
+      if (enterTimer) window.clearTimeout(enterTimer);
+      if (exitTimer) window.clearTimeout(exitTimer);
+      if (unmountTimer) window.clearTimeout(unmountTimer);
+    };
   }, [open]);
 
   useEffect(() => {
