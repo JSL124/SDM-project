@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import LoginBoundary from './LoginBoundary';
+import { getApiUrl } from '@/lib/api';
 
 type MockLoginResponse = {
   ok: boolean;
@@ -130,7 +131,7 @@ describe('LoginBoundary', () => {
     await user.click(screen.getByRole('button', { name: 'Log In' }));
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith('http://localhost:8080/api/login', {
+      expect(fetchMock).toHaveBeenCalledWith(getApiUrl('/api/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

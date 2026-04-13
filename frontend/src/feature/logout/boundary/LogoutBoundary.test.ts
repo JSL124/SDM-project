@@ -1,4 +1,5 @@
 import { displayLoginPage, logout } from './LogoutBoundary';
+import { getApiUrl } from '@/lib/api';
 
 type MockLogoutResponse = {
   ok: boolean;
@@ -20,7 +21,7 @@ describe('LogoutBoundary', () => {
     });
 
     await expect(logout()).resolves.toBe(true);
-    expect(fetchMock).toHaveBeenCalledWith('http://localhost:8080/api/logout', {
+    expect(fetchMock).toHaveBeenCalledWith(getApiUrl('/api/logout'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });

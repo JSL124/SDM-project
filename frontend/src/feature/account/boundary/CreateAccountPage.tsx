@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useSyncExternalStore, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { getApiUrl } from '@/lib/api';
 
 const ROLES = ['Fundraiser', 'Donee', 'User admin', 'Platform manager'] as const;
 
@@ -104,7 +105,7 @@ export default function CreateAccountPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/account', {
+      const response = await fetch(getApiUrl('/api/account'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ profileId, username, password, role }),

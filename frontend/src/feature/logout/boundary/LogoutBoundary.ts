@@ -1,10 +1,12 @@
+import { getApiUrl } from '@/lib/api';
+
 type LogoutResponse = {
   success: boolean;
 };
 
 export async function logout(): Promise<boolean> {
   try {
-    const response = await fetch('http://localhost:8080/api/logout', {
+    const response = await fetch(getApiUrl('/api/logout'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });

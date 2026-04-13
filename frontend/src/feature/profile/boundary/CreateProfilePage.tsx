@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useSyncExternalStore, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { getApiUrl } from '@/lib/api';
 
 function subscribeToStorage(callback: () => void) {
   window.addEventListener('storage', callback);
@@ -107,7 +108,7 @@ export default function CreateProfilePage() {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/profile', {
+      const response = await fetch(getApiUrl('/api/profile'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, phoneNum, address }),

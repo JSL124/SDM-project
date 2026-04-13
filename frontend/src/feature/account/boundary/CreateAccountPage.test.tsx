@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateAccountPage from './CreateAccountPage';
+import { getApiUrl } from '@/lib/api';
 
 const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({
@@ -137,7 +138,7 @@ describe('CreateAccountPage', () => {
     expect(await screen.findByText('Account Created')).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith('http://localhost:8080/api/account', {
+      expect(fetchMock).toHaveBeenCalledWith(getApiUrl('/api/account'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateProfilePage from './CreateProfilePage';
+import { getApiUrl } from '@/lib/api';
 
 const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({
@@ -161,7 +162,7 @@ describe('CreateProfilePage', () => {
     await user.click(screen.getByRole('button', { name: 'Create' }));
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith('http://localhost:8080/api/profile', {
+      expect(fetchMock).toHaveBeenCalledWith(getApiUrl('/api/profile'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
