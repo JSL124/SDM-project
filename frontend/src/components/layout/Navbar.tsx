@@ -165,73 +165,71 @@ export default function Navbar() {
           {/* Desktop actions */}
           {loggedInUser ? (
             <div className="hidden items-center gap-6 md:flex">
-              <>
-                <div
-                  className="relative pb-3"
-                  onMouseEnter={() => setProfileMenuOpen(true)}
-                  onMouseLeave={() => setProfileMenuOpen(false)}
-                  onFocus={() => setProfileMenuOpen(true)}
-                  onBlur={(event) => {
-                    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-                      setProfileMenuOpen(false);
-                    }
-                  }}
+              <div
+                className="relative pb-3"
+                onMouseEnter={() => setProfileMenuOpen(true)}
+                onMouseLeave={() => setProfileMenuOpen(false)}
+                onFocus={() => setProfileMenuOpen(true)}
+                onBlur={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                    setProfileMenuOpen(false);
+                  }
+                }}
+              >
+                <button
+                  type="button"
+                  className="flex h-12 items-center gap-2 rounded-full bg-[#f2f2f5] px-2 pr-3 text-sm text-gray-900 transition-colors hover:bg-[#ebebf0] focus:bg-[#ebebf0] focus:outline-none"
+                  aria-haspopup="menu"
+                  aria-expanded={profileMenuOpen}
+                  aria-label={`Open profile menu for ${displayName || 'user'}`}
                 >
-                  <button
-                    type="button"
-                    className="flex h-12 items-center gap-2 rounded-full bg-[#f2f2f5] px-2 pr-3 text-sm text-gray-900 transition-colors hover:bg-[#ebebf0] focus:bg-[#ebebf0] focus:outline-none"
-                    aria-haspopup="menu"
-                    aria-expanded={profileMenuOpen}
-                    aria-label={`Open profile menu for ${displayName || 'user'}`}
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#168fe3] text-[15px] font-semibold text-white">
+                    {avatarLetter}
+                  </div>
+                  {displayName ? (
+                    <span className="max-w-28 truncate text-[17px] font-normal tracking-tight text-gray-800">{displayName}</span>
+                  ) : null}
+                  <svg
+                    className={`h-4 w-4 text-gray-700 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    aria-hidden="true"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#168fe3] text-[15px] font-semibold text-white">
-                      {avatarLetter}
-                    </div>
-                    {displayName ? (
-                      <span className="max-w-28 truncate text-[17px] font-normal tracking-tight text-gray-800">{displayName}</span>
-                    ) : null}
-                    <svg
-                      className={`h-4 w-4 text-gray-700 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
 
+                <div
+                  className={`absolute right-0 top-full z-50 pt-3 transition-all duration-200 ease-out ${
+                    profileMenuOpen
+                      ? 'pointer-events-auto translate-y-0 opacity-100'
+                      : 'pointer-events-none -translate-y-2 opacity-0'
+                  }`}
+                >
+                  <div className="absolute inset-x-0 -top-3 h-3" aria-hidden="true" />
                   <div
-                    className={`absolute right-0 top-full z-50 pt-3 transition-all duration-200 ease-out ${
-                      profileMenuOpen
-                        ? 'pointer-events-auto translate-y-0 opacity-100'
-                        : 'pointer-events-none -translate-y-2 opacity-0'
-                    }`}
+                    className="w-[250px] rounded-[30px] border border-gray-100 bg-white px-4 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.12)]"
+                    role="menu"
+                    aria-label="Profile menu"
                   >
-                    <div className="absolute inset-x-0 -top-3 h-3" aria-hidden="true" />
-                    <div
-                      className="w-[250px] rounded-[30px] border border-gray-100 bg-white px-4 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.12)]"
-                      role="menu"
-                      aria-label="Profile menu"
-                    >
-                      <div className="flex flex-col">
-                        <button
-                          type="button"
-                          onMouseDown={(event) => {
-                            event.preventDefault();
-                            void handleLogout();
-                          }}
-                          className="rounded-2xl px-3 py-5 text-left text-[17px] font-medium text-gray-900 transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
-                          role="menuitem"
-                        >
-                          Sign out
-                        </button>
-                        </div>
-                      </div>
+                    <div className="flex flex-col">
+                      <button
+                        type="button"
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          void handleLogout();
+                        }}
+                        className="rounded-2xl px-3 py-5 text-left text-[17px] font-medium text-gray-900 transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                        role="menuitem"
+                      >
+                        Sign out
+                      </button>
                     </div>
+                  </div>
                 </div>
-              </>
+              </div>
             </div>
           ) : (
             <div className="hidden items-center gap-6 md:flex">

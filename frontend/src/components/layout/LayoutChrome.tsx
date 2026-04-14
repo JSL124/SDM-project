@@ -3,7 +3,6 @@
 import { Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import AdminNavbar from './AdminNavbar';
-import Footer from './Footer';
 import Navbar from './Navbar';
 
 interface LayoutChromeProps {
@@ -29,7 +28,6 @@ export default function LayoutChrome({ children }: LayoutChromeProps) {
     <>
       <Navbar />
       {children}
-      <Footer />
     </>
   );
 }
