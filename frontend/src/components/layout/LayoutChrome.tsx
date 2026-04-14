@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import AdminNavbar from './AdminNavbar';
 import Footer from './Footer';
@@ -16,7 +17,9 @@ export default function LayoutChrome({ children }: LayoutChromeProps) {
   if (isAdminRoute) {
     return (
       <>
-        <AdminNavbar />
+        <Suspense fallback={null}>
+          <AdminNavbar />
+        </Suspense>
         {children}
       </>
     );
