@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import LoginModal from '@/components/ui/LoginModal';
-import { logout, displayLoginPage } from '@/feature/logout/boundary/LogoutBoundary';
 import {
   consumeFlashBanner,
   queueFlashBanner,
@@ -12,6 +11,7 @@ import {
   type FlashBannerPayload,
   type FlashBannerVariant,
 } from '@/lib/flashBanner';
+import { logout, displayLoginPage } from '@/feature/logout/boundary/LogoutPage';
 
 type LoggedInUser = {
   email: string;

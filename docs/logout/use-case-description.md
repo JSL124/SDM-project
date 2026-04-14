@@ -27,7 +27,7 @@ The actor selects the logout option on the system interface.
 2. `LogoutPage` receives the logout request.
 3. `LogoutPage` sends the request to `LogoutController.logout()`.
 4. `LogoutController` processes the logout request.
-5. `LogoutController` returns control to `LogoutPage.displayLoginPage()`.
+5. `LogoutController` returns control to `LogoutPage`.
 6. `LogoutPage` displays the login page.
 
 ## Alternative Flow

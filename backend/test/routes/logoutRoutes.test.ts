@@ -1,9 +1,9 @@
 describe('logoutRoutes', () => {
-  async function loadHandler(logoutResult: boolean) {
+  async function loadHandler() {
     jest.resetModules();
     jest.doMock('../../src/logout/controller/LogoutController', () => ({
       LogoutController: jest.fn().mockImplementation(() => ({
-        logout: jest.fn().mockReturnValue(logoutResult),
+        logout: jest.fn(),
       })),
     }));
 
@@ -33,7 +33,7 @@ describe('logoutRoutes', () => {
   });
 
   it('returns 200 with success true when logout succeeds', async () => {
-    const handler = await loadHandler(true);
+    const handler = await loadHandler();
     const response = createResponse();
 
     await handler({}, response);

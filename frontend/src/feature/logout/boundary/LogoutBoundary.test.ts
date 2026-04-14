@@ -1,12 +1,12 @@
-import { displayLoginPage, logout } from './LogoutBoundary';
 import { getApiUrl } from '@/lib/api';
+import { displayLoginPage, logout } from './LogoutPage';
 
 type MockLogoutResponse = {
   ok: boolean;
   json: () => Promise<{ success: boolean }>;
 };
 
-describe('LogoutBoundary', () => {
+describe('LogoutPage', () => {
   const fetchMock = jest.fn<Promise<MockLogoutResponse>, [RequestInfo | URL, RequestInit?]>();
 
   beforeEach(() => {

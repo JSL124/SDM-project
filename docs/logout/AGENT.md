@@ -15,9 +15,9 @@ This file supplements the repository-wide rules in the root `AGENT.md`. Shared a
 
 ## 2. Related Code Locations
 
-- Frontend boundary: `frontend/src/feature/logout` (not yet implemented)
-- Backend controller: `backend/src/logout` (not yet implemented)
-- HTTP route adapter: logout route file (not yet implemented)
+- Frontend boundary: `frontend/src/feature/logout/boundary/LogoutPage.ts`
+- Backend controller: `backend/src/logout/controller/LogoutController.ts`
+- HTTP route adapter: `backend/src/routes/logoutRoutes.ts`
 
 ## 3. Related Design Documents
 
@@ -60,3 +60,4 @@ Before considering logout work complete, verify:
 - All four actors are named consistently in logout documents
 - `LogoutPage` and `LogoutController` are the only BCE classes referenced in the current logout design
 - `displayLoginPage()` is used consistently as the post-logout UI transition
+- The implemented logout boundary file remains `frontend/src/feature/logout/boundary/LogoutPage.ts`

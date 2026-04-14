@@ -1,11 +1,11 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AdminNavbar from './AdminNavbar';
-import { displayLoginPage, logout } from '@/feature/logout/boundary/LogoutBoundary';
+import { displayLoginPage, logout } from '@/feature/logout/boundary/LogoutPage';
 
 const pushMock = jest.fn();
 
-jest.mock('@/feature/logout/boundary/LogoutBoundary', () => ({
+jest.mock('@/feature/logout/boundary/LogoutPage', () => ({
   logout: jest.fn(),
   displayLoginPage: jest.fn(),
 }));

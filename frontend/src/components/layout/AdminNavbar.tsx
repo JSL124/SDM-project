@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { displayLoginPage, logout } from '@/feature/logout/boundary/LogoutBoundary';
 import { consumeFlashBanner, queueFlashBanner } from '@/lib/flashBanner';
+import { displayLoginPage, logout } from '@/feature/logout/boundary/LogoutPage';
 
 type StoredUser = {
   email: string;
