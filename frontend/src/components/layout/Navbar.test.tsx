@@ -64,8 +64,15 @@ jest.mock('next/navigation', () => ({
 const logoutMock = logout as jest.MockedFunction<typeof logout>;
 const displayLoginPageMock = displayLoginPage as jest.MockedFunction<typeof displayLoginPage>;
 
+function setStoredUser(role: 'User admin' | 'Fundraiser' = 'Fundraiser') {
+  localStorage.setItem('userRole', role);
+  localStorage.setItem('userEmail', 'jason21888@naver.com');
+  localStorage.setItem('userUsername', 'jason04');
+}
+
 describe('Navbar', () => {
   beforeEach(() => {
+    localStorage.clear();
     logoutMock.mockReset();
     displayLoginPageMock.mockReset();
     pushMock.mockReset();
@@ -83,58 +90,68 @@ describe('Navbar', () => {
     return user;
   }
 
-  it('shows the profile trigger with the username after login', async () => {
-    const user = await logInThroughNavbar();
+  it('shows only the logo and sign in when no user is logged in', () => {
+    render(<Navbar />);
+
+    expect(screen.getByRole('link', { name: 'Fund Raise' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Fundraising Activities' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Toggle menu' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Open profile menu/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument();
+  });
+
+  it('shows fundraising activity link and profile trigger when a stored user exists', () => {
+    setStoredUser();
+    render(<Navbar />);
+
+    expect(screen.getByRole('link', { name: 'Fundraising Activities' })).toHaveAttribute('href', '/fundraiser/manage-activities');
+    expect(screen.getByRole('button', { name: 'Open profile menu for jason04' })).toBeInTheDocument();
+  });
+
+  it('shows only Sign out in the desktop profile menu', async () => {
+    setStoredUser();
+    const user = userEvent.setup();
+    render(<Navbar />);
+
     const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
-
-    expect(screen.getByText('You have successfully signed in to FundRaise.')).toBeInTheDocument();
-    expect(profileTrigger).toHaveTextContent('J');
-    expect(profileTrigger).toHaveTextContent('jason04');
-
     await user.hover(profileTrigger);
 
     expect(screen.getByRole('menu', { name: 'Profile menu' })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Profile' })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Your impact' })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Account settings' })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Admin' })).toHaveAttribute('href', '/admin/manage-users');
     expect(screen.getByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Profile' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Your impact' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Account settings' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Admin' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'My Activities' })).not.toBeInTheDocument();
   });
 
-  it('redirects admins to /admin/manage-users after login', async () => {
-    await logInThroughNavbar('User admin');
+  it('shows Sign out in the mobile menu for logged-in users', async () => {
+    setStoredUser();
+    const user = userEvent.setup();
+    render(<Navbar />);
 
-    expect(pushMock).toHaveBeenCalledWith('/admin/manage-users');
+    await user.click(screen.getByRole('button', { name: 'Toggle menu' }));
+
+    expect(screen.getAllByText('jason04')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
   });
 
-  it('does not redirect non-admin users after login', async () => {
-    await logInThroughNavbar('Fundraiser');
+  it('shows no admin-only menu item even for user admins', async () => {
+    setStoredUser('User admin');
+    const user = userEvent.setup();
+    render(<Navbar />);
 
-    expect(pushMock).not.toHaveBeenCalled();
-  });
-
-  it('does not show the Admin menu item for non-admin users', async () => {
-    const user = await logInThroughNavbar('Fundraiser');
-    const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
-
-    await user.hover(profileTrigger);
+    await user.hover(screen.getByRole('button', { name: 'Open profile menu for jason04' }));
 
     expect(screen.queryByRole('menuitem', { name: 'Admin' })).not.toBeInTheDocument();
   });
 
-  it('shows the Admin link in the mobile menu only for user admins', async () => {
-    const user = await logInThroughNavbar();
-
-    await user.click(screen.getByRole('button', { name: 'Toggle menu' }));
-
-    expect(screen.getByRole('link', { name: 'Admin' })).toHaveAttribute('href', '/admin/manage-users');
-  });
-
-  it('shows Sign In again after successful logout', async () => {
+  it('clears the navbar back to logo-only after successful logout', async () => {
     logoutMock.mockResolvedValue(true);
-    await logInThroughNavbar();
-    const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
+    setStoredUser();
+    render(<Navbar />);
 
+    const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
     fireEvent.focus(profileTrigger);
     fireEvent.mouseDown(screen.getByRole('menuitem', { name: 'Sign out' }));
 
@@ -144,17 +161,19 @@ describe('Navbar', () => {
       expect(pushMock).toHaveBeenCalledWith('/');
     });
 
+    expect(screen.queryByRole('link', { name: 'Fundraising Activities' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Toggle menu' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Open profile menu/i })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Open profile menu for jason04' })).not.toBeInTheDocument();
     expect(screen.getByText('You have successfully signed out of FundRaise.')).toBeInTheDocument();
   });
 
-  it('keeps the user logged in when logout fails', async () => {
+  it('keeps the user visible when logout fails', async () => {
     logoutMock.mockResolvedValue(false);
-    await logInThroughNavbar();
-    pushMock.mockReset();
-    const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
+    setStoredUser();
+    render(<Navbar />);
 
+    const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
     fireEvent.focus(profileTrigger);
     fireEvent.mouseDown(screen.getByRole('menuitem', { name: 'Sign out' }));
 
@@ -165,6 +184,13 @@ describe('Navbar', () => {
     expect(displayLoginPageMock).not.toHaveBeenCalled();
     expect(pushMock).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Open profile menu for jason04' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Sign In' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Fundraising Activities' })).toBeInTheDocument();
+  });
+
+  it('allows login through the sign in button', async () => {
+    await logInThroughNavbar('Fundraiser');
+
+    expect(screen.getByRole('button', { name: 'Open profile menu for jason04' })).toBeInTheDocument();
+    expect(screen.getByText('You have successfully signed in to FundRaise.')).toBeInTheDocument();
   });
 });
