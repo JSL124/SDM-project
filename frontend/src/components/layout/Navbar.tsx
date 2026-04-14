@@ -51,13 +51,31 @@ const CLOSED_FLASH_BANNER: FlashBannerState = {
   variant: 'success',
 };
 
+function getInitialFlashBanner(): FlashBannerState {
+  if (typeof window === 'undefined') {
+    return CLOSED_FLASH_BANNER;
+  }
+
+  const pendingBanner = consumeFlashBanner();
+  if (!pendingBanner) {
+    return CLOSED_FLASH_BANNER;
+  }
+
+  return {
+    isOpen: true,
+    message: pendingBanner.message,
+    durationMs: pendingBanner.durationMs,
+    variant: pendingBanner.variant ?? 'success',
+  };
+}
+
 export default function Navbar() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
-  const [flashBanner, setFlashBanner] = useState<FlashBannerState>(CLOSED_FLASH_BANNER);
+  const [flashBanner, setFlashBanner] = useState<FlashBannerState>(getInitialFlashBanner);
   const [bannerVisible, setBannerVisible] = useState(false);
 
   function showFlashBanner(message: string, durationMs: number, variant: FlashBannerVariant = 'success'): void {
@@ -87,18 +105,6 @@ export default function Navbar() {
     }
     window.addEventListener(FLASH_BANNER_EVENT, handleBroadcast);
     return () => window.removeEventListener(FLASH_BANNER_EVENT, handleBroadcast);
-  }, []);
-
-  useEffect(() => {
-    const pendingBanner = consumeFlashBanner();
-    if (!pendingBanner) return;
-
-    setFlashBanner({
-      isOpen: true,
-      message: pendingBanner.message,
-      durationMs: pendingBanner.durationMs,
-      variant: pendingBanner.variant ?? 'success',
-    });
   }, []);
 
   useEffect(() => {
