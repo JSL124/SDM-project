@@ -5,6 +5,7 @@ import loginRoutes from './routes/loginRoutes';
 import logoutRoutes from './routes/logoutRoutes';
 import profileRoutes from './routes/profileRoutes';
 import accountRoutes from './routes/accountRoutes';
+import fundraisingRoutes from './routes/fundraisingRoutes';
 import { getDbConnectionSummary, query } from './db';
 
 dotenv.config({ override: true });
@@ -16,6 +17,7 @@ app.use(loginRoutes);
 app.use(logoutRoutes);
 app.use(profileRoutes);
 app.use(accountRoutes);
+app.use(fundraisingRoutes);
 
 const PORT = process.env.PORT || 8080;
 
