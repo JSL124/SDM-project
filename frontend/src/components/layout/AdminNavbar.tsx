@@ -48,6 +48,23 @@ function getServerUser(): StoredUser {
 
 const LOGOUT_SUCCESS_BANNER_MS = 3000;
 
+function getInitialSuccessBanner(): SuccessBanner {
+  if (typeof window === 'undefined') {
+    return { isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS };
+  }
+
+  const pendingBanner = consumeFlashBanner();
+  if (!pendingBanner) {
+    return { isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS };
+  }
+
+  return {
+    isOpen: true,
+    message: pendingBanner.message,
+    durationMs: pendingBanner.durationMs,
+  };
+}
+
 export default function AdminNavbar() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,7 +73,7 @@ export default function AdminNavbar() {
 
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [successBanner, setSuccessBanner] = useState<SuccessBanner>({ isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS });
+  const [successBanner, setSuccessBanner] = useState<SuccessBanner>(getInitialSuccessBanner);
   const [bannerVisible, setBannerVisible] = useState(false);
 
   useEffect(() => {
@@ -66,24 +83,8 @@ export default function AdminNavbar() {
     return () => clearTimeout(timer);
   }, [successBanner.durationMs, successBanner.isOpen]);
 
-  useEffect(() => {
-    const pendingBanner = consumeFlashBanner();
-    if (pendingBanner) {
-      showSuccessBanner(pendingBanner.message, pendingBanner.durationMs);
-    }
-  }, []);
-
   const displayName = storedUser.username.trim() || storedUser.email.split('@')[0]?.trim() || '';
   const avatarLetter = (displayName[0] ?? storedUser.email[0] ?? '?').toUpperCase();
-
-  function showSuccessBanner(message: string, durationMs: number): void {
-    setBannerVisible(false);
-    setSuccessBanner({
-      isOpen: true,
-      message,
-      durationMs,
-    });
-  }
 
   async function handleLogout(): Promise<void> {
     const didLogout = await logout();
