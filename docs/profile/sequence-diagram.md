@@ -5,7 +5,7 @@ sequenceDiagram
     actor UserAdmin as User Admin
     participant CreateProfilePage as Boundary: CreateProfilePage
     participant ProfileRoute as HTTP API: POST /api/profile
-    participant ProfileController as Controller: ProfileController
+    participant CreateProfileController as Controller: CreateProfileController
     participant UserProfile as Entity: UserProfile
     participant PostgreSQL as Database: PostgreSQL
 
@@ -19,30 +19,30 @@ sequenceDiagram
         CreateProfilePage-->>UserAdmin: Display validation error message
     else Validation succeeds
         CreateProfilePage->>ProfileRoute: POST /api/profile
-        ProfileRoute->>ProfileController: createProfile(name, email, phoneNum, address)
-        ProfileController->>UserProfile: existsByEmail(email)
+        ProfileRoute->>CreateProfileController: createProfile(name, email, phoneNum, address)
+        CreateProfileController->>UserProfile: existsByEmail(email)
         UserProfile->>PostgreSQL: SELECT from user_profile WHERE email = ?
         PostgreSQL-->>UserProfile: Result rows
-        UserProfile-->>ProfileController: true or false
+        UserProfile-->>CreateProfileController: true or false
 
         alt Email exists
-            ProfileController-->>ProfileRoute: { success: false, message: "Email already exists." }
+            CreateProfileController-->>ProfileRoute: { success: false, message: "Email already exists." }
             ProfileRoute-->>CreateProfilePage: HTTP 409 + result
             CreateProfilePage->>CreateProfilePage: displayError(message)
             CreateProfilePage-->>UserAdmin: Display "Email already exists."
         else Email not exists
-            ProfileController->>UserProfile: saveProfile(name, email, phoneNum, address)
+            CreateProfileController->>UserProfile: saveProfile(name, email, phoneNum, address)
             UserProfile->>PostgreSQL: INSERT INTO user_profile
             PostgreSQL-->>UserProfile: Insert result
-            UserProfile-->>ProfileController: true or false
+            UserProfile-->>CreateProfileController: true or false
 
             alt Save success
-                ProfileController-->>ProfileRoute: { success: true, message: "Profile created successfully." }
+                CreateProfileController-->>ProfileRoute: { success: true, message: "Profile created successfully." }
                 ProfileRoute-->>CreateProfilePage: HTTP 201 + result
                 CreateProfilePage->>CreateProfilePage: displaySuccess()
                 CreateProfilePage-->>UserAdmin: Display success message
             else Save fails
-                ProfileController-->>ProfileRoute: { success: false, message: "Failed to create profile." }
+                CreateProfileController-->>ProfileRoute: { success: false, message: "Failed to create profile." }
                 ProfileRoute-->>CreateProfilePage: HTTP 400 + result
                 CreateProfilePage->>CreateProfilePage: displayError(message)
                 CreateProfilePage-->>UserAdmin: Display error message

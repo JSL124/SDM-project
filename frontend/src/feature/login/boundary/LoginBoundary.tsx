@@ -29,19 +29,24 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<LoginStatus>(initialStatus);
 
-  function validateInput(email: string, password: string): void {
+  function validateInput(email: string, password: string): boolean {
     if (!email.trim()) {
-      throw new Error('Please enter your email.');
+      displayError('Please enter your email.');
+      return false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      throw new Error('Please enter a valid email address.');
+      displayError('Please enter a valid email address.');
+      return false;
     }
 
     if (!password.trim()) {
-      throw new Error('Please enter your password.');
+      displayError('Please enter your password.');
+      return false;
     }
+
+    return true;
   }
 
   function displayError(message: string): void {
@@ -71,10 +76,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
       submitted: true,
     }));
 
-    try {
-      validateInput(email, password);
-    } catch (error) {
-      displayError((error as Error).message);
+    if (!validateInput(email, password)) {
       return;
     }
 

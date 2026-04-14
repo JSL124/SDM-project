@@ -5,7 +5,7 @@ classDiagram
     class LoginPage {
         <<Boundary>>
         +submitLogin(email: String, password: String) void
-        +validateInput(email: String, password: String) void
+        +validateInput(email: String, password: String) boolean
         +displayLoginSuccess() void
         +displayError(message: String) void
     }

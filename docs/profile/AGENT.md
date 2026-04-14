@@ -17,7 +17,7 @@ This file supplements the repository-wide rules in the root `AGENT.md`. Shared a
 
 - Frontend boundary: `frontend/src/feature/profile/boundary/CreateProfilePage.tsx`
 - Frontend page: `frontend/src/app/admin/create-profile/page.tsx`
-- Backend controller: `backend/src/profile/controller/ProfileController.ts`
+- Backend controller: `backend/src/profile/controller/CreateProfileController.ts`
 - Backend entity: `backend/src/profile/entity/UserProfile.ts`
 - HTTP route adapter: `backend/src/routes/profileRoutes.ts`
 - Backend tests: `backend/test/controller`, `backend/test/entity`, `backend/test/routes`

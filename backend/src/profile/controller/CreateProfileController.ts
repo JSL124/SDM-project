@@ -5,7 +5,7 @@ export type CreateProfileResult =
   | { success: false; message: 'Email already exists.' }
   | { success: false; message: 'Failed to create profile.' };
 
-export class ProfileController {
+export class CreateProfileController {
   async createProfile(name: string, email: string, phoneNum: string, address: string): Promise<CreateProfileResult> {
     const emailExists = await UserProfile.existsByEmail(email);
     if (emailExists) {

@@ -20,7 +20,7 @@ Excluded:
 
 ## Test Levels
 - Unit tests for `UserProfile` entity methods (`existsByEmail`, `saveProfile`)
-- Unit tests for `ProfileController` create profile logic
+- Unit tests for `CreateProfileController` create profile logic
 - Component or UI tests for `CreateProfilePage` boundary validation behavior at `frontend/src/feature/profile/boundary/CreateProfilePage.tsx`
 - Route tests for `POST /api/profile` response mapping
 

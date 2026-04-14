@@ -19,11 +19,7 @@ type LoggedInUser = {
   role?: string;
 };
 
-function getInitialLoggedInUser(): LoggedInUser | null {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
+function getStoredLoggedInUser(): LoggedInUser | null {
   const email = localStorage.getItem('userEmail')?.trim() ?? '';
   const username = localStorage.getItem('userUsername')?.trim() ?? '';
   const role = localStorage.getItem('userRole')?.trim() ?? '';
@@ -48,32 +44,20 @@ type FlashBannerState = {
 
 const LOGOUT_SUCCESS_BANNER_MS = 3000;
 const LOGIN_SUCCESS_BANNER_MS = 4500;
-
-function getInitialFlashBanner(): FlashBannerState {
-  if (typeof window === 'undefined') {
-    return { isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS, variant: 'success' };
-  }
-
-  const pendingBanner = consumeFlashBanner();
-  if (!pendingBanner) {
-    return { isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS, variant: 'success' };
-  }
-
-  return {
-    isOpen: true,
-    message: pendingBanner.message,
-    durationMs: pendingBanner.durationMs,
-    variant: pendingBanner.variant ?? 'success',
-  };
-}
+const CLOSED_FLASH_BANNER: FlashBannerState = {
+  isOpen: false,
+  message: '',
+  durationMs: LOGOUT_SUCCESS_BANNER_MS,
+  variant: 'success',
+};
 
 export default function Navbar() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(getInitialLoggedInUser);
-  const [flashBanner, setFlashBanner] = useState<FlashBannerState>(getInitialFlashBanner);
+  const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
+  const [flashBanner, setFlashBanner] = useState<FlashBannerState>(CLOSED_FLASH_BANNER);
   const [bannerVisible, setBannerVisible] = useState(false);
 
   function showFlashBanner(message: string, durationMs: number, variant: FlashBannerVariant = 'success'): void {
@@ -106,8 +90,20 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    const pendingBanner = consumeFlashBanner();
+    if (!pendingBanner) return;
+
+    setFlashBanner({
+      isOpen: true,
+      message: pendingBanner.message,
+      durationMs: pendingBanner.durationMs,
+      variant: pendingBanner.variant ?? 'success',
+    });
+  }, []);
+
+  useEffect(() => {
     function syncLoggedInUser(): void {
-      setLoggedInUser(getInitialLoggedInUser());
+      setLoggedInUser(getStoredLoggedInUser());
     }
 
     window.addEventListener('storage', syncLoggedInUser);
@@ -127,6 +123,9 @@ export default function Navbar() {
     if (user.role?.trim() === 'User admin') {
       queueFlashBanner({ message: loginSuccessMessage, durationMs: LOGIN_SUCCESS_BANNER_MS, variant: 'success' });
       router.push('/admin/manage-users');
+    } else if (user.role?.trim() === 'Platform manager') {
+      queueFlashBanner({ message: loginSuccessMessage, durationMs: LOGIN_SUCCESS_BANNER_MS, variant: 'success' });
+      router.push('/admin/platform-management');
     }
   }
 
@@ -299,7 +298,7 @@ export default function Navbar() {
           }}
           onTransitionEnd={() => {
             if (!bannerVisible) {
-              setFlashBanner({ isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS, variant: 'success' });
+              setFlashBanner(CLOSED_FLASH_BANNER);
             }
           }}
           role={flashBanner.variant === 'error' ? 'alert' : 'status'}

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { consumeFlashBanner, queueFlashBanner } from '@/lib/flashBanner';
 import { displayLoginPage, logout } from '@/feature/logout/boundary/LogoutPage';
+import { hasRole } from '@/lib/auth';
 
 type StoredUser = {
   email: string;
@@ -104,16 +105,20 @@ export default function AdminNavbar() {
     router.push('/');
   }
 
-  const tabs: Array<{ key: 'account' | 'profile'; label: string; href: string }> = [
-    { key: 'account', label: 'Account', href: '/admin/manage-users?tab=account' },
-    { key: 'profile', label: 'Profile', href: '/admin/manage-users?tab=profile' },
-  ];
+  const isPlatformManager = hasRole(storedUser.role, 'Platform manager');
+  const homeHref = isPlatformManager ? '/admin/platform-management' : '/admin/manage-users?tab=account';
+  const tabs: Array<{ key: 'account' | 'profile'; label: string; href: string }> = isPlatformManager
+    ? []
+    : [
+        { key: 'account', label: 'Account', href: '/admin/manage-users?tab=account' },
+        { key: 'profile', label: 'Profile', href: '/admin/manage-users?tab=profile' },
+      ];
 
   return (
     <>
       <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link href="/admin/manage-users?tab=account" className="text-2xl font-bold text-gray-900">
+          <Link href={homeHref} className="text-2xl font-bold text-gray-900">
             Fund<span className="text-brand">Raise</span>
           </Link>
 

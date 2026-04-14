@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { ProfileController } from '../profile/controller/ProfileController';
+import { CreateProfileController } from '../profile/controller/CreateProfileController';
 
 const router = Router();
-const profileController = new ProfileController();
+const profileController = new CreateProfileController();
 
 router.post('/api/profile', async (req: Request, res: Response) => {
   try {

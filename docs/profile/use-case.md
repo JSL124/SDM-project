@@ -12,7 +12,7 @@ User Admin
 ## Supporting Components
 - `CreateProfilePage` as the boundary at `frontend/src/feature/profile/boundary/CreateProfilePage.tsx`
 - `POST /api/profile` as the HTTP API route at `backend/src/routes/profileRoutes.ts`
-- `ProfileController` as the controller at `backend/src/profile/controller/ProfileController.ts`
+- `CreateProfileController` as the controller at `backend/src/profile/controller/CreateProfileController.ts`
 - `UserProfile` as the entity at `backend/src/profile/entity/UserProfile.ts`
 - `user_profile` table in PostgreSQL
 

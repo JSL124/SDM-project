@@ -1,14 +1,14 @@
-import { ProfileController } from '../../src/profile/controller/ProfileController';
+import { CreateProfileController } from '../../src/profile/controller/CreateProfileController';
 import { UserProfile } from '../../src/profile/entity/UserProfile';
 
 // Mock the UserProfile entity
 jest.mock('../../src/profile/entity/UserProfile');
 
-describe('ProfileController', () => {
-  let controller: ProfileController;
+describe('CreateProfileController', () => {
+  let controller: CreateProfileController;
 
   beforeEach(() => {
-    controller = new ProfileController();
+    controller = new CreateProfileController();
     jest.clearAllMocks();
   });
 

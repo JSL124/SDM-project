@@ -3,8 +3,8 @@ describe('profileRoutes', () => {
 
   async function loadHandler(createProfileResult: unknown, shouldReject = false) {
     jest.resetModules();
-    jest.doMock('../../src/profile/controller/ProfileController', () => ({
-      ProfileController: jest.fn().mockImplementation(() => ({
+    jest.doMock('../../src/profile/controller/CreateProfileController', () => ({
+      CreateProfileController: jest.fn().mockImplementation(() => ({
         createProfile: shouldReject
           ? jest.fn().mockRejectedValue(new Error('db down'))
           : jest.fn().mockResolvedValue(createProfileResult),
