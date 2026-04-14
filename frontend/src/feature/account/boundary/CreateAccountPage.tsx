@@ -3,6 +3,7 @@
 import { useState, useEffect, useSyncExternalStore, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { getApiUrl } from '@/lib/api';
+import { hasRole } from '@/lib/auth';
 
 const ROLES = ['Fundraiser', 'Donee', 'User admin', 'Platform manager'] as const;
 
@@ -27,7 +28,7 @@ function subscribeToStorage(callback: () => void) {
 }
 
 function getIsAuthorized(): boolean {
-  return localStorage.getItem('userRole') === 'User admin';
+  return hasRole(localStorage.getItem('userRole'), 'User admin');
 }
 
 export default function CreateAccountPage() {

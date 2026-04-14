@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { hasRole } from '@/lib/auth';
 
 type ActiveTab = 'account' | 'profile';
 
@@ -16,12 +18,13 @@ function subscribeToStorage(callback: () => void) {
 }
 
 function getIsAuthorized(): boolean {
-  return localStorage.getItem('userRole') === 'User admin';
+  return hasRole(localStorage.getItem('userRole'), 'User admin');
 }
 
 export default function ManageUsersPage() {
   const authorized = useSyncExternalStore(subscribeToStorage, getIsAuthorized, () => false);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('account');
+  const searchParams = useSearchParams();
+  const activeTab: ActiveTab = searchParams.get('tab') === 'profile' ? 'profile' : 'account';
 
   if (!authorized) {
     return (
@@ -41,25 +44,11 @@ export default function ManageUsersPage() {
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
-      {/* Sidebar - horizontal on mobile, vertical on desktop */}
-      <nav className="flex flex-row gap-2 border-b border-gray-200 bg-white p-4 md:w-56 md:flex-col md:border-b-0 md:border-r md:shadow-sm">
-        <h2 className="hidden text-sm font-semibold uppercase tracking-wider text-gray-400 md:mb-4 md:block">
-          Management
-        </h2>
-        {(Object.keys(TAB_CONFIG) as ActiveTab[]).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-              activeTab === tab
-                ? 'bg-brand text-white'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            {TAB_CONFIG[tab].label}
-          </button>
-        ))}
-      </nav>
+      {/* Placeholder sidebar column — tab selection moved to top navbar */}
+      <nav
+        aria-hidden="true"
+        className="hidden border-b border-gray-200 bg-white md:block md:w-56 md:border-b-0 md:border-r md:shadow-sm"
+      />
 
       {/* Main content */}
       <div className="relative flex-1 p-6 md:p-10">

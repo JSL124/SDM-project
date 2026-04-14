@@ -3,6 +3,7 @@
 import { useState, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { getApiUrl } from '@/lib/api';
+import { hasRole } from '@/lib/auth';
 
 function subscribeToStorage(callback: () => void) {
   window.addEventListener('storage', callback);
@@ -10,7 +11,7 @@ function subscribeToStorage(callback: () => void) {
 }
 
 function getIsAuthorized(): boolean {
-  return localStorage.getItem('userRole') === 'Fundraiser';
+  return hasRole(localStorage.getItem('userRole'), 'Fundraiser');
 }
 
 type Activity = {
@@ -40,10 +41,9 @@ export default function ViewFundraisingActivitiesPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authorized) return;
     void loadActivities();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authorized]);
+  }, []);
 
   async function loadActivities(): Promise<void> {
     setLoading(true);
@@ -99,20 +99,6 @@ export default function ViewFundraisingActivitiesPage() {
     setViewState('detail');
   }
 
-  if (!authorized) {
-    return (
-      <div className="mx-auto w-full max-w-md rounded-2xl bg-white px-8 py-10 text-center shadow-xl">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
-          <svg className="h-7 w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </div>
-        <p className="mt-4 text-lg font-semibold text-gray-900">Access Denied</p>
-        <p className="mt-2 text-sm text-gray-500">Only Fundraisers can manage fundraising activities.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       {/* Sidebar */}
@@ -131,15 +117,17 @@ export default function ViewFundraisingActivitiesPage() {
           <>
             <div className="mb-6 flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900">Fundraising Activities</h1>
-              <Link
-                href="/fundraiser/create-fundraising-activity"
-                aria-label="Create Fundraising Activity"
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-lg transition-colors hover:bg-brand-hover"
-              >
-                <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-              </Link>
+              {authorized ? (
+                <Link
+                  href="/fundraiser/create-fundraising-activity"
+                  aria-label="Create Fundraising Activity"
+                  className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-lg transition-colors hover:bg-brand-hover"
+                >
+                  <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                </Link>
+              ) : null}
             </div>
 
             {error ? (

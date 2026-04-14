@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import LayoutChrome from '@/components/layout/LayoutChrome';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -17,9 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Navbar />
-        {children}
-        <Footer />
+        <LayoutChrome>{children}</LayoutChrome>
       </body>
     </html>
   );

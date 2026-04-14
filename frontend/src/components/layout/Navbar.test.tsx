@@ -101,6 +101,18 @@ describe('Navbar', () => {
     expect(screen.getByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument();
   });
 
+  it('redirects admins to /admin/manage-users after login', async () => {
+    await logInThroughNavbar('User admin');
+
+    expect(pushMock).toHaveBeenCalledWith('/admin/manage-users');
+  });
+
+  it('does not redirect non-admin users after login', async () => {
+    await logInThroughNavbar('Fundraiser');
+
+    expect(pushMock).not.toHaveBeenCalled();
+  });
+
   it('does not show the Admin menu item for non-admin users', async () => {
     const user = await logInThroughNavbar('Fundraiser');
     const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
@@ -140,6 +152,7 @@ describe('Navbar', () => {
   it('keeps the user logged in when logout fails', async () => {
     logoutMock.mockResolvedValue(false);
     await logInThroughNavbar();
+    pushMock.mockReset();
     const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
 
     fireEvent.focus(profileTrigger);

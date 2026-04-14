@@ -1,5 +1,8 @@
 describe('fundraisingRoutes', () => {
   let consoleErrorSpy: jest.SpyInstance;
+  let createFundraisingActivityMock: jest.Mock;
+  let getFundraisingActivitiesMock: jest.Mock;
+  let getFundraisingActivityDetailsMock: jest.Mock;
 
   function createResponse() {
     const response = {
@@ -26,24 +29,27 @@ describe('fundraisingRoutes', () => {
     rejectGetDetail = false,
   ) {
     jest.resetModules();
+    createFundraisingActivityMock = rejectCreate
+      ? jest.fn().mockRejectedValue(new Error('db down'))
+      : jest.fn().mockResolvedValue(createResult);
+    getFundraisingActivitiesMock = rejectGetList
+      ? jest.fn().mockRejectedValue(new Error('db down'))
+      : jest.fn().mockResolvedValue(getListResult);
+    getFundraisingActivityDetailsMock = rejectGetDetail
+      ? jest.fn().mockRejectedValue(new Error('db down'))
+      : jest.fn().mockResolvedValue(getDetailResult);
 
     jest.doMock('../../src/db', () => ({ query: jest.fn() }));
     jest.doMock('../../src/fundraising/controller/CreateFundraisingActivityController', () => ({
       CreateFundraisingActivityController: jest.fn().mockImplementation(() => ({
-        createFundraisingActivity: rejectCreate
-          ? jest.fn().mockRejectedValue(new Error('db down'))
-          : jest.fn().mockResolvedValue(createResult),
+        createFundraisingActivity: createFundraisingActivityMock,
       })),
     }));
 
     jest.doMock('../../src/fundraising/controller/ViewFundraisingActivitiesController', () => ({
       ViewFundraisingActivitiesController: jest.fn().mockImplementation(() => ({
-        getFundraisingActivities: rejectGetList
-          ? jest.fn().mockRejectedValue(new Error('db down'))
-          : jest.fn().mockResolvedValue(getListResult),
-        getFundraisingActivityDetails: rejectGetDetail
-          ? jest.fn().mockRejectedValue(new Error('db down'))
-          : jest.fn().mockResolvedValue(getDetailResult),
+        getFundraisingActivities: getFundraisingActivitiesMock,
+        getFundraisingActivityDetails: getFundraisingActivityDetailsMock,
       })),
     }));
 
@@ -99,17 +105,36 @@ describe('fundraisingRoutes', () => {
     expect(response.body).toEqual({ success: true, message: 'Fundraising activity created successfully.' });
   });
 
-  it('returns 400 when validation fails', async () => {
+  it('passes the request body fields to the create controller in order', async () => {
     const { postHandler } = await loadRouteHandlers(
-      { success: false, message: 'Title is required.' },
+      { success: true, message: 'Fundraising activity created successfully.' },
       [], null,
     );
     const response = createResponse();
 
-    await postHandler({ body: { ...validBody, title: '' } }, response);
+    await postHandler({ body: validBody }, response);
+
+    expect(createFundraisingActivityMock).toHaveBeenCalledWith(
+      'Help the Community',
+      'A fundraiser to support local shelters.',
+      5000,
+      'Community',
+      '2026-05-01',
+      '2026-06-01',
+    );
+  });
+
+  it('returns 400 when the controller returns a create failure result', async () => {
+    const { postHandler } = await loadRouteHandlers(
+      { success: false, message: 'Failed to create fundraising activity.' },
+      [], null,
+    );
+    const response = createResponse();
+
+    await postHandler({ body: validBody }, response);
 
     expect(response.statusCode).toBe(400);
-    expect(response.body).toEqual({ success: false, message: 'Title is required.' });
+    expect(response.body).toEqual({ success: false, message: 'Failed to create fundraising activity.' });
   });
 
   it('returns 400 when save fails', async () => {

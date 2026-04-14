@@ -5,6 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import LoginModal from '@/components/ui/LoginModal';
 import { logout, displayLoginPage } from '@/feature/logout/boundary/LogoutBoundary';
+import { hasRole } from '@/lib/auth';
+import {
+  consumeFlashBanner,
+  queueFlashBanner,
+  FLASH_BANNER_EVENT,
+  type FlashBannerPayload,
+  type FlashBannerVariant,
+} from '@/lib/flashBanner';
 
 const profileMenuItems = ['Profile', 'Your impact', 'Account settings'] as const;
 
@@ -14,14 +22,33 @@ type LoggedInUser = {
   role?: string;
 };
 
-type SuccessBanner = {
+type FlashBannerState = {
   isOpen: boolean;
   message: string;
   durationMs: number;
+  variant: FlashBannerVariant;
 };
 
 const LOGIN_SUCCESS_BANNER_MS = 4500;
 const LOGOUT_SUCCESS_BANNER_MS = 3000;
+
+function getInitialFlashBanner(): FlashBannerState {
+  if (typeof window === 'undefined') {
+    return { isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS, variant: 'success' };
+  }
+
+  const pendingBanner = consumeFlashBanner();
+  if (!pendingBanner) {
+    return { isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS, variant: 'success' };
+  }
+
+  return {
+    isOpen: true,
+    message: pendingBanner.message,
+    durationMs: pendingBanner.durationMs,
+    variant: pendingBanner.variant ?? 'success',
+  };
+}
 
 export default function Navbar() {
   const router = useRouter();
@@ -29,34 +56,50 @@ export default function Navbar() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
-  const [successBanner, setSuccessBanner] = useState<SuccessBanner>({ isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS });
+  const [flashBanner, setFlashBanner] = useState<FlashBannerState>(getInitialFlashBanner);
   const [bannerVisible, setBannerVisible] = useState(false);
 
+  function showFlashBanner(message: string, durationMs: number, variant: FlashBannerVariant = 'success'): void {
+    setBannerVisible(false);
+    setFlashBanner({
+      isOpen: true,
+      message,
+      durationMs,
+      variant,
+    });
+  }
+
   useEffect(() => {
-    if (!successBanner.isOpen) return;
+    if (!flashBanner.isOpen) return;
     // Trigger slide-down on next frame
     requestAnimationFrame(() => setBannerVisible(true));
     // Start slide-up after the configured duration
-    const timer = setTimeout(() => setBannerVisible(false), successBanner.durationMs);
+    const timer = setTimeout(() => setBannerVisible(false), flashBanner.durationMs);
     return () => clearTimeout(timer);
-  }, [successBanner.durationMs, successBanner.isOpen]);
+  }, [flashBanner.durationMs, flashBanner.isOpen]);
+
+  useEffect(() => {
+    function handleBroadcast(event: Event): void {
+      const detail = (event as CustomEvent<FlashBannerPayload>).detail;
+      if (!detail || typeof detail.message !== 'string' || typeof detail.durationMs !== 'number') return;
+      showFlashBanner(detail.message, detail.durationMs, detail.variant ?? 'success');
+    }
+    window.addEventListener(FLASH_BANNER_EVENT, handleBroadcast);
+    return () => window.removeEventListener(FLASH_BANNER_EVENT, handleBroadcast);
+  }, []);
 
   const displayName = loggedInUser?.username?.trim() || loggedInUser?.email.split('@')[0]?.trim() || '';
   const avatarLetter = (displayName[0] ?? loggedInUser?.email[0] ?? '?').toUpperCase();
 
-  function showSuccessBanner(message: string, durationMs: number): void {
-    setBannerVisible(false);
-    setSuccessBanner({
-      isOpen: true,
-      message,
-      durationMs,
-    });
-  }
-
   function handleLoginSuccess(user: LoggedInUser): void {
     setLoggedInUser(user);
     setLoginOpen(false);
-    showSuccessBanner('You have successfully signed in to FundRaise.', LOGIN_SUCCESS_BANNER_MS);
+    const loginSuccessMessage = 'You have successfully signed in to FundRaise.';
+    showFlashBanner(loginSuccessMessage, LOGIN_SUCCESS_BANNER_MS, 'success');
+    if (hasRole(user.role, 'User admin')) {
+      queueFlashBanner({ message: loginSuccessMessage, durationMs: LOGIN_SUCCESS_BANNER_MS, variant: 'success' });
+      router.push('/admin/manage-users');
+    }
   }
 
   async function handleLogout(): Promise<void> {
@@ -64,8 +107,11 @@ export default function Navbar() {
     if (didLogout) {
       setMenuOpen(false);
       setProfileMenuOpen(false);
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userUsername');
       displayLoginPage(() => setLoggedInUser(null));
-      showSuccessBanner('You have successfully signed out of FundRaise.', LOGOUT_SUCCESS_BANNER_MS);
+      showFlashBanner('You have successfully signed out of FundRaise.', LOGOUT_SUCCESS_BANNER_MS, 'success');
       router.push('/');
     }
   }
@@ -93,12 +139,9 @@ export default function Navbar() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <button type="button" className="flex items-center gap-1 text-[15px] font-medium text-gray-600 hover:text-gray-900">
-              <span>Fundraise</span>
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+            <Link href="/fundraiser/manage-activities" className="flex items-center gap-1 text-[15px] font-medium text-gray-600 hover:text-gray-900">
+              <span>Fundraising Activities</span>
+            </Link>
           </div>
 
           {/* Desktop actions */}
@@ -174,7 +217,7 @@ export default function Navbar() {
                             {item}
                           </button>
                         ))}
-                        {loggedInUser.role === 'User admin' ? (
+                        {hasRole(loggedInUser.role, 'User admin') ? (
                           <Link
                             href="/admin/manage-users"
                             className="rounded-2xl px-3 py-5 text-left text-[17px] font-medium text-gray-900 transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
@@ -183,7 +226,7 @@ export default function Navbar() {
                             Admin
                           </Link>
                         ) : null}
-                        {loggedInUser.role === 'Fundraiser' ? (
+                        {hasRole(loggedInUser.role, 'Fundraiser') ? (
                           <Link
                             href="/fundraiser/manage-activities"
                             className="rounded-2xl px-3 py-5 text-left text-[17px] font-medium text-gray-900 transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
@@ -250,12 +293,13 @@ export default function Navbar() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <button type="button" className="flex items-center gap-1 text-left text-sm font-medium text-gray-600" onClick={() => setMenuOpen(false)}>
-                <span>Fundraise</span>
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+              <Link
+                href="/fundraiser/manage-activities"
+                className="flex items-center gap-1 text-left text-sm font-medium text-gray-600"
+                onClick={() => setMenuOpen(false)}
+              >
+                <span>Fundraising Activities</span>
+              </Link>
               {loggedInUser ? (
                 <>
                   <button
@@ -284,7 +328,7 @@ export default function Navbar() {
                       {item}
                     </button>
                   ))}
-                  {loggedInUser.role === 'User admin' ? (
+                  {hasRole(loggedInUser.role, 'User admin') ? (
                     <Link
                       href="/admin/manage-users"
                       className="rounded-md px-3 py-1.5 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
@@ -293,7 +337,7 @@ export default function Navbar() {
                       Admin
                     </Link>
                   ) : null}
-                  {loggedInUser.role === 'Fundraiser' ? (
+                  {hasRole(loggedInUser.role, 'Fundraiser') ? (
                     <Link
                       href="/fundraiser/manage-activities"
                       className="rounded-md px-3 py-1.5 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
@@ -324,7 +368,7 @@ export default function Navbar() {
         )}
       </nav>
 
-      {successBanner.isOpen && (
+      {flashBanner.isOpen && (
         <div
           className="overflow-hidden transition-all duration-500 ease-in-out"
           style={{
@@ -333,13 +377,20 @@ export default function Navbar() {
           }}
           onTransitionEnd={() => {
             if (!bannerVisible) {
-              setSuccessBanner({ isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS });
+              setFlashBanner({ isOpen: false, message: '', durationMs: LOGOUT_SUCCESS_BANNER_MS, variant: 'success' });
             }
           }}
+          role={flashBanner.variant === 'error' ? 'alert' : 'status'}
         >
-          <div className="border-b border-green-200 bg-brand-light px-6 py-3 text-center text-sm text-gray-700">
-            <span className="mr-2">✓</span>
-            {successBanner.message}
+          <div
+            className={`border-b px-6 py-3 text-center text-sm ${
+              flashBanner.variant === 'error'
+                ? 'border-red-200 bg-red-50 text-red-700'
+                : 'border-green-200 bg-brand-light text-gray-700'
+            }`}
+          >
+            <span className="mr-2">{flashBanner.variant === 'error' ? '⚠' : '✓'}</span>
+            {flashBanner.message}
           </div>
         </div>
       )}

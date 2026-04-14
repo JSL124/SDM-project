@@ -3,29 +3,44 @@
 import { useState, useEffect, useSyncExternalStore, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { getApiUrl } from '@/lib/api';
+import { hasRole } from '@/lib/auth';
+import { broadcastFlashBanner } from '@/lib/flashBanner';
 
 function subscribeToStorage(callback: () => void) {
   window.addEventListener('storage', callback);
   return () => window.removeEventListener('storage', callback);
 }
 
-function getIsAuthorized(): boolean {
-  return localStorage.getItem('userRole') === 'Fundraiser';
+type AccessStatus = 'authorized' | 'anonymous' | 'unauthorized';
+
+function getAccessStatus(): AccessStatus {
+  const storedRole = typeof window === 'undefined' ? null : localStorage.getItem('userRole');
+  if (!storedRole || !storedRole.trim()) return 'anonymous';
+  if (hasRole(storedRole, 'Fundraiser')) return 'authorized';
+  return 'unauthorized';
 }
 
-type ActivityResult = {
+const ANONYMOUS_ACCESS_MESSAGE = 'Please sign in as a Fundraiser to create fundraising activities.';
+const UNAUTHORIZED_ACCESS_MESSAGE = 'Only Fundraisers can create fundraising activities.';
+const ACCESS_BANNER_DURATION_MS = 4000;
+
+type CreateFundraisingActivityResult = {
   success: boolean;
   message: string;
 };
 
-type ActivityStatus = {
+type CreateFundraisingActivityStatus = {
   submitted: boolean;
-  result: ActivityResult | null;
+  result: CreateFundraisingActivityResult | null;
 };
+
+const ENTER_ANIMATION_DELAY_MS = 20;
+const EXIT_ANIMATION_MS = 250;
 
 export default function CreateFundraisingActivityPage() {
   const router = useRouter();
-  const authorized = useSyncExternalStore(subscribeToStorage, getIsAuthorized, () => false);
+  const accessStatus = useSyncExternalStore(subscribeToStorage, getAccessStatus, () => 'anonymous' as AccessStatus);
+  const authorized = accessStatus === 'authorized';
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -33,14 +48,29 @@ export default function CreateFundraisingActivityPage() {
   const [category, setCategory] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [status, setStatus] = useState<ActivityStatus>({
+  const [status, setStatus] = useState<CreateFundraisingActivityStatus>({
     submitted: false,
     result: null,
   });
   const [successVisible, setSuccessVisible] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   const isSuccess = status.result?.success;
   const message = status.submitted ? status.result?.message : '';
+
+  useEffect(() => {
+    const enterTimer = window.setTimeout(() => setVisible(true), ENTER_ANIMATION_DELAY_MS);
+    return () => window.clearTimeout(enterTimer);
+  }, []);
+
+  useEffect(() => {
+    if (accessStatus === 'authorized') return;
+    broadcastFlashBanner({
+      message: accessStatus === 'anonymous' ? ANONYMOUS_ACCESS_MESSAGE : UNAUTHORIZED_ACCESS_MESSAGE,
+      durationMs: ACCESS_BANNER_DURATION_MS,
+      variant: 'error',
+    });
+  }, [accessStatus]);
 
   useEffect(() => {
     if (!isSuccess) return;
@@ -140,7 +170,7 @@ export default function CreateFundraisingActivityPage() {
         }),
       });
 
-      const data = (await response.json()) as ActivityResult;
+      const data = (await response.json()) as CreateFundraisingActivityResult;
       if (response.ok && data.success) {
         displayFundraisingActivityConfirmation();
         return;
@@ -153,7 +183,10 @@ export default function CreateFundraisingActivityPage() {
   }
 
   function closeFundraisingActivityForm(): void {
-    router.push('/fundraiser/manage-activities');
+    setVisible(false);
+    window.setTimeout(() => {
+      router.push('/fundraiser/manage-activities');
+    }, EXIT_ANIMATION_MS);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
@@ -164,13 +197,7 @@ export default function CreateFundraisingActivityPage() {
   if (!authorized) {
     return (
       <div className="mx-auto w-full max-w-md rounded-2xl bg-white px-8 py-10 text-center shadow-xl">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
-          <svg className="h-7 w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </div>
-        <p className="mt-4 text-lg font-semibold text-gray-900">Access Denied</p>
-        <p className="mt-2 text-sm text-gray-500">Only Fundraisers can create fundraising activities.</p>
+        <p className="text-lg font-semibold text-gray-900">Access denied</p>
       </div>
     );
   }
@@ -199,11 +226,27 @@ export default function CreateFundraisingActivityPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-lg rounded-2xl bg-white px-8 py-10 shadow-xl">
-      <h2 className="text-center text-2xl font-bold text-gray-900">Create Fundraising Activity</h2>
-      <p className="mt-2 text-center text-sm text-gray-500">Fill in the details for the new fundraising activity</p>
+    <div
+      className={`relative mx-auto w-full max-w-lg transition-all duration-300 ease-out ${
+        visible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-4 scale-[0.98] opacity-0'
+      }`}
+    >
+      <button
+        type="button"
+        onClick={closeFundraisingActivityForm}
+        aria-label="Close"
+        className="absolute right-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+      >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
 
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+      <div className="rounded-2xl bg-white px-8 py-10 shadow-xl">
+        <h2 className="text-center text-2xl font-bold text-gray-900">Create Fundraising Activity</h2>
+        <p className="mt-2 text-center text-sm text-gray-500">Fill in the details for the new fundraising activity</p>
+
+        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
         <div>
           <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-gray-700">
             Title
@@ -310,6 +353,7 @@ export default function CreateFundraisingActivityPage() {
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 }

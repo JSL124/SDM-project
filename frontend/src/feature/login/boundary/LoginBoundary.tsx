@@ -29,24 +29,19 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<LoginStatus>(initialStatus);
 
-  function validateInput(email: string, password: string): boolean {
+  function validateInput(email: string, password: string): void {
     if (!email.trim()) {
-      displayError('Please enter your email.');
-      return false;
+      throw new Error('Please enter your email.');
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      displayError('Please enter a valid email address.');
-      return false;
+      throw new Error('Please enter a valid email address.');
     }
 
     if (!password.trim()) {
-      displayError('Please enter your password.');
-      return false;
+      throw new Error('Please enter your password.');
     }
-
-    return true;
   }
 
   function displayError(message: string): void {
@@ -76,7 +71,10 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
       submitted: true,
     }));
 
-    if (!validateInput(email, password)) {
+    try {
+      validateInput(email, password);
+    } catch (error) {
+      displayError((error as Error).message);
       return;
     }
 
@@ -91,6 +89,10 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
       if (response.ok && data.success) {
         if (data.role) {
           localStorage.setItem('userRole', data.role);
+        }
+        localStorage.setItem('userEmail', email);
+        if (data.username) {
+          localStorage.setItem('userUsername', data.username);
         }
         displayLoginSuccess(data.username, data.role);
         return;

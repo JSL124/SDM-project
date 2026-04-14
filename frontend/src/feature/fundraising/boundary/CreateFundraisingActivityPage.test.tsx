@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateFundraisingActivityPage from './CreateFundraisingActivityPage';
 import { getApiUrl } from '@/lib/api';
+import { FLASH_BANNER_EVENT, type FlashBannerPayload } from '@/lib/flashBanner';
 
 const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({
@@ -24,12 +25,52 @@ describe('CreateFundraisingActivityPage', () => {
     localStorage.setItem('userRole', 'Fundraiser');
   });
 
-  it('shows access denied when user is not User admin', () => {
-    localStorage.setItem('userRole', 'User admin');
+  function captureFlashBanner(): FlashBannerPayload[] {
+    const payloads: FlashBannerPayload[] = [];
+    const listener = (event: Event) => {
+      payloads.push((event as CustomEvent<FlashBannerPayload>).detail);
+    };
+    window.addEventListener(FLASH_BANNER_EVENT, listener);
+    return payloads;
+  }
+
+  it('broadcasts an error banner and hides the form when logged in as a non-Fundraiser', () => {
+    localStorage.setItem('userRole', 'Donee');
+    const banners = captureFlashBanner();
     render(<CreateFundraisingActivityPage />);
 
-    expect(screen.getByText('Access Denied')).toBeInTheDocument();
-    expect(screen.getByText('Only Fundraisers can create fundraising activities.')).toBeInTheDocument();
+    expect(screen.queryByText('Create Fundraising Activity')).not.toBeInTheDocument();
+    expect(screen.getByText('Access denied')).toBeInTheDocument();
+    expect(banners).toHaveLength(1);
+    expect(banners[0]).toEqual(
+      expect.objectContaining({
+        message: 'Only Fundraisers can create fundraising activities.',
+        variant: 'error',
+      }),
+    );
+  });
+
+  it('broadcasts a sign-in banner when the visitor is not logged in', () => {
+    localStorage.removeItem('userRole');
+    const banners = captureFlashBanner();
+    render(<CreateFundraisingActivityPage />);
+
+    expect(screen.queryByText('Create Fundraising Activity')).not.toBeInTheDocument();
+    expect(banners).toHaveLength(1);
+    expect(banners[0]).toEqual(
+      expect.objectContaining({
+        message: 'Please sign in as a Fundraiser to create fundraising activities.',
+        variant: 'error',
+      }),
+    );
+  });
+
+  it('allows fundraiser access when the stored role contains extra whitespace', () => {
+    localStorage.setItem('userRole', '  Fundraiser  ');
+    render(<CreateFundraisingActivityPage />);
+
+    expect(screen.getByText('Create Fundraising Activity')).toBeInTheDocument();
+    expect(screen.queryByText('Access denied')).not.toBeInTheDocument();
   });
 
   it('shows no message before submit', () => {
@@ -70,12 +111,28 @@ describe('CreateFundraisingActivityPage', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('blocks submission when targetAmount is empty', async () => {
+  it('blocks submission when target amount is empty', async () => {
     const user = userEvent.setup();
     render(<CreateFundraisingActivityPage />);
 
     await user.type(screen.getByLabelText('Title'), 'Help the Community');
     await user.type(screen.getByLabelText('Description'), 'A great cause.');
+    await user.type(screen.getByLabelText('Category'), 'Community');
+    await user.type(screen.getByLabelText('Start Date'), '2026-05-01');
+    await user.type(screen.getByLabelText('End Date'), '2026-06-01');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    expect(screen.getByText('Please enter a target amount greater than zero.')).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('blocks submission when target amount is zero', async () => {
+    const user = userEvent.setup();
+    render(<CreateFundraisingActivityPage />);
+
+    await user.type(screen.getByLabelText('Title'), 'Help the Community');
+    await user.type(screen.getByLabelText('Description'), 'A great cause.');
+    await user.type(screen.getByLabelText('Target Amount ($)'), '0');
     await user.type(screen.getByLabelText('Category'), 'Community');
     await user.type(screen.getByLabelText('Start Date'), '2026-05-01');
     await user.type(screen.getByLabelText('End Date'), '2026-06-01');
@@ -146,6 +203,22 @@ describe('CreateFundraisingActivityPage', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('blocks submission when endDate is equal to startDate', async () => {
+    const user = userEvent.setup();
+    render(<CreateFundraisingActivityPage />);
+
+    await user.type(screen.getByLabelText('Title'), 'Help the Community');
+    await user.type(screen.getByLabelText('Description'), 'A great cause.');
+    await user.type(screen.getByLabelText('Target Amount ($)'), '5000');
+    await user.type(screen.getByLabelText('Category'), 'Community');
+    await user.type(screen.getByLabelText('Start Date'), '2026-06-01');
+    await user.type(screen.getByLabelText('End Date'), '2026-06-01');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    expect(screen.getByText('End date must be after start date.')).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('shows a network error when the backend is unavailable', async () => {
     const user = userEvent.setup();
     fetchMock.mockRejectedValue(new Error('Network failure'));
@@ -160,6 +233,28 @@ describe('CreateFundraisingActivityPage', () => {
     await user.click(screen.getByRole('button', { name: 'Create' }));
 
     expect(await screen.findByText('Unable to connect to server.')).toBeInTheDocument();
+  });
+
+  it('shows the backend validation message when the request is rejected', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValue({
+      ok: false,
+      json: async () => ({
+        success: false,
+        message: 'Failed to create fundraising activity.',
+      }),
+    });
+    render(<CreateFundraisingActivityPage />);
+
+    await user.type(screen.getByLabelText('Title'), 'Help the Community');
+    await user.type(screen.getByLabelText('Description'), 'A great cause.');
+    await user.type(screen.getByLabelText('Target Amount ($)'), '5000');
+    await user.type(screen.getByLabelText('Category'), 'Community');
+    await user.type(screen.getByLabelText('Start Date'), '2026-05-01');
+    await user.type(screen.getByLabelText('End Date'), '2026-06-01');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    expect(await screen.findByText('Failed to create fundraising activity.')).toBeInTheDocument();
   });
 
   it('sends the expected payload and shows confirmation on success', async () => {
@@ -199,12 +294,25 @@ describe('CreateFundraisingActivityPage', () => {
     expect(await screen.findByText('Fundraising activity created successfully.')).toBeInTheDocument();
   });
 
-  it('navigates to manage-users when Cancel is clicked', async () => {
+  it('navigates to manage activities when Cancel is clicked', async () => {
     const user = userEvent.setup();
     render(<CreateFundraisingActivityPage />);
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
-    expect(mockPush).toHaveBeenCalledWith('/fundraiser/manage-activities');
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/fundraiser/manage-activities');
+    });
+  });
+
+  it('navigates to manage activities when the close button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<CreateFundraisingActivityPage />);
+
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/fundraiser/manage-activities');
+    });
   });
 });
