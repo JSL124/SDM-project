@@ -7,22 +7,21 @@ US-PROFILE-01
 Create User Profile
 
 ## User Story
-As a User Admin, I want to create a new user profile by entering the user's personal details so that the user's information is stored in the system.
+As a User Admin, I want to create a new user profile by entering a role and description so that the system can store available profile types.
 
 ## Business Value
-- Enables user admins to onboard new users into the platform.
-- Centralises user profile data for management and reference.
-- Prevents duplicate profiles by enforcing unique email addresses.
+- Enables user admins to define profile roles used by the platform.
+- Centralises profile role descriptions for account management.
+- Keeps profile creation aligned with the BCE CreateProfile flow.
 
 ## Acceptance Criteria
-1. The system shall allow a user admin to enter a name, email, phone number, and address on the create profile page.
-2. The system shall validate that all fields are provided before sending the request.
-3. The system shall validate that the email format is correct.
-4. The system shall create the user profile when all fields are valid and the email does not already exist.
-5. The system shall display a success message after the profile is created.
-6. The system shall display an error message when any field is empty or invalid.
-7. The system shall display an error message when the email already exists in the system.
-8. The system shall display an error message when the backend service is unavailable.
+1. The system shall allow a user admin to enter a role and description on the create profile page.
+2. The system shall validate that both fields are provided before sending the request.
+3. The system shall call `CreateProfileController.createProfile(role, description)`.
+4. The system shall persist the profile through `UserProfile.createProfile(role, description)`.
+5. The system shall display a success message when a `UserProfile` is returned.
+6. The system shall display an error message when profile creation returns `null`.
+7. The system shall display an error message when the backend service is unavailable.
 
 ## Scope
 Included:
@@ -30,7 +29,6 @@ Included:
 - Client-side input validation
 - HTTP API route invocation
 - Profile controller invocation
-- Email uniqueness check in PostgreSQL
 - Profile data persistence
 - Success and failure message handling
 

@@ -17,26 +17,18 @@ sequenceDiagram
         LoginPage-->>Fundraiser: Display validation error
     else Validation succeeds
         LoginPage->>LoginController: login(email, password)
-        LoginController->>UserAccount: findAccountByEmail(email)
+        LoginController->>UserAccount: login(email, password)
         UserAccount->>PostgreSQL: SELECT account by email
         PostgreSQL-->>UserAccount: Account record or null
         UserAccount-->>LoginController: UserAccount or null
+        LoginController-->>LoginPage: UserAccount or null
 
-        alt Account not found
-            LoginController-->>LoginPage: { success: false, message: "Account does not exist." }
-            LoginPage-->>Fundraiser: Display "Account does not exist."
-        else Account found
-            LoginController->>UserAccount: verifyPassword(password)
-            UserAccount-->>LoginController: true or false
-
-            alt Password invalid
-                LoginController-->>LoginPage: { success: false, message: "Invalid password." }
-                LoginPage-->>Fundraiser: Display "Invalid password."
-            else Password valid
-                LoginController-->>LoginPage: { success: true, message: "Login successful." }
-                LoginPage->>LoginPage: displayLoginSuccess()
-                LoginPage-->>Fundraiser: Display login success message
-            end
+        alt UserAccount is not null
+            LoginPage->>LoginPage: displayLoginSuccess()
+            LoginPage-->>Fundraiser: Display login success message
+        else UserAccount is null
+            LoginPage->>LoginPage: displayError()
+            LoginPage-->>Fundraiser: Display login error message
         end
     end
 ```

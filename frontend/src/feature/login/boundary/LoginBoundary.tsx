@@ -6,8 +6,11 @@ import { getApiUrl } from '@/lib/api';
 type LoginBoundaryResult = {
   success: boolean;
   message: string;
-  role?: string;
-  username?: string;
+  user?: {
+    email: string;
+    username?: string;
+    role?: string;
+  };
 };
 
 type LoginStatus = {
@@ -59,7 +62,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
     });
   }
 
-  function displayLoginSuccess(username?: string, role?: string): void {
+  function displaySuccess(user: { email: string; username?: string; role?: string }): void {
     setStatus({
       submitted: true,
       result: {
@@ -67,7 +70,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
         message: 'Login successful.',
       },
     });
-    onLoginSuccess?.({ email, username, role });
+    onLoginSuccess?.(user);
   }
 
   async function submitLogin(email: string, password: string): Promise<void> {
@@ -89,14 +92,15 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
 
       const data = (await response.json()) as LoginBoundaryResult;
       if (response.ok && data.success) {
-        if (data.role) {
-          localStorage.setItem('userRole', data.role);
-        }
-        localStorage.setItem('userEmail', email);
-        if (data.username) {
-          localStorage.setItem('userUsername', data.username);
-        }
-        displayLoginSuccess(data.username, data.role);
+        const loggedInUser = {
+          email: data.user?.email ?? email,
+          username: data.user?.username ?? '',
+          role: data.user?.role ?? '',
+        };
+        localStorage.setItem('userEmail', loggedInUser.email);
+        localStorage.setItem('userUsername', loggedInUser.username);
+        localStorage.setItem('userRole', loggedInUser.role);
+        displaySuccess(loggedInUser);
         return;
       }
 

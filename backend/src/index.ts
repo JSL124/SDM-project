@@ -2,9 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import loginRoutes from './routes/loginRoutes';
-import logoutRoutes from './routes/logoutRoutes';
-import profileRoutes from './routes/profileRoutes';
-import accountRoutes from './routes/accountRoutes';
+import CreateProfileRoutes from './routes/CreateProfileRoutes';
+import CreateAccountRoutes from './routes/CreateAccountRoutes';
 import fundraisingRoutes from './routes/fundraisingRoutes';
 import { getDbConnectionSummary, query } from './db';
 
@@ -14,9 +13,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(loginRoutes);
-app.use(logoutRoutes);
-app.use(profileRoutes);
-app.use(accountRoutes);
+app.use(CreateProfileRoutes);
+app.use(CreateAccountRoutes);
 app.use(fundraisingRoutes);
 
 const PORT = process.env.PORT || 8080;

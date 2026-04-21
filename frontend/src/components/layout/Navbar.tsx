@@ -11,7 +11,8 @@ import {
   type FlashBannerPayload,
   type FlashBannerVariant,
 } from '@/lib/flashBanner';
-import { logout, displayLoginPage } from '@/feature/logout/boundary/LogoutPage';
+import { logout } from '@/feature/Logout/boundary/LogoutPage';
+import { hasRole } from '@/lib/auth';
 
 type LoggedInUser = {
   email: string;
@@ -126,27 +127,22 @@ export default function Navbar() {
     setLoginOpen(false);
     const loginSuccessMessage = 'You have successfully signed in to FundRaise.';
     showFlashBanner(loginSuccessMessage, LOGIN_SUCCESS_BANNER_MS, 'success');
-    if (user.role?.trim() === 'User admin') {
+    if (hasRole(user.role, 'User admin')) {
       queueFlashBanner({ message: loginSuccessMessage, durationMs: LOGIN_SUCCESS_BANNER_MS, variant: 'success' });
-      router.push('/admin/manage-users');
-    } else if (user.role?.trim() === 'Platform manager') {
+      router.push('/admin/manage-users?tab=account');
+    } else if (hasRole(user.role, 'Platform manager')) {
       queueFlashBanner({ message: loginSuccessMessage, durationMs: LOGIN_SUCCESS_BANNER_MS, variant: 'success' });
       router.push('/admin/platform-management');
     }
   }
 
   async function handleLogout(): Promise<void> {
-    const didLogout = await logout();
-    if (didLogout) {
-      setMenuOpen(false);
-      setProfileMenuOpen(false);
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userEmail');
-      localStorage.removeItem('userUsername');
-      displayLoginPage(() => setLoggedInUser(null));
-      showFlashBanner('You have successfully signed out of FundRaise.', LOGOUT_SUCCESS_BANNER_MS, 'success');
-      router.push('/');
-    }
+    await logout();
+    setMenuOpen(false);
+    setProfileMenuOpen(false);
+    setLoggedInUser(null);
+    showFlashBanner('You have successfully signed out of FundRaise.', LOGOUT_SUCCESS_BANNER_MS, 'success');
+    router.push('/');
   }
 
   return (

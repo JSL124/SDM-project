@@ -10,10 +10,10 @@ Allow a user admin to create a new user account linked to an existing user profi
 User Admin
 
 ## Supporting Components
-- `CreateAccountPage` as the boundary at `frontend/src/feature/account/boundary/CreateAccountPage.tsx`
-- `CreateAccountController` as the controller at `backend/src/account/controller/CreateAccountController.ts`
-- `UserAccount` as the main entity at `backend/src/login/entity/UserAccount.ts`
-- `UserProfile` as the supporting entity at `backend/src/profile/entity/UserProfile.ts`
+- `CreateAccountPage` as the boundary at `frontend/src/feature/CreateAccount/boundary/CreateAccountPage.tsx`
+- `CreateAccountController` as the controller at `backend/src/CreateAccount/controller/CreateAccountController.ts`
+- `UserAccount` as the main entity at `backend/src/shared/entity/UserAccount.ts`
+- `UserProfile` as the supporting entity at `backend/src/CreateProfile/entity/UserProfile.ts`
 - `user_account` and `user_profile` tables in PostgreSQL
 
 ## Preconditions

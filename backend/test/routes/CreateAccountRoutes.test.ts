@@ -1,9 +1,9 @@
-describe('accountRoutes', () => {
+describe('CreateAccountRoutes', () => {
   let consoleErrorSpy: jest.SpyInstance;
 
   async function loadHandler(createAccountResult: unknown, shouldReject = false) {
     jest.resetModules();
-    jest.doMock('../../src/account/controller/CreateAccountController', () => ({
+    jest.doMock('../../src/CreateAccount/controller/CreateAccountController', () => ({
       CreateAccountController: jest.fn().mockImplementation(() => ({
         createAccount: shouldReject
           ? jest.fn().mockRejectedValue(new Error('db down'))
@@ -11,8 +11,8 @@ describe('accountRoutes', () => {
       })),
     }));
 
-    const { default: accountRoutes } = await import('../../src/routes/accountRoutes');
-    return (accountRoutes as any).stack[0].route.stack[0].handle;
+    const { default: CreateAccountRoutes } = await import('../../src/routes/CreateAccountRoutes');
+    return (CreateAccountRoutes as any).stack[0].route.stack[0].handle;
   }
 
   function createResponse() {
@@ -42,19 +42,18 @@ describe('accountRoutes', () => {
   });
 
   it('returns 200 for successful account creation', async () => {
-    const handler = await loadHandler({
-      success: true,
-      message: 'Account created successfully.',
-    });
+    const handler = await loadHandler({ email: 'new.user@example.com' });
     const response = createResponse();
 
     await handler(
       {
         body: {
-          profileId: '1',
-          username: 'newuser',
+          email: 'new.user@example.com',
           password: 'Password123!',
-          role: 'Fundraiser',
+          name: 'New User',
+          DOB: '1998-01-01',
+          phoneNum: '0498765432',
+          profileId: '1',
         },
       },
       response
@@ -68,19 +67,18 @@ describe('accountRoutes', () => {
   });
 
   it('returns 400 when account creation fails', async () => {
-    const handler = await loadHandler({
-      success: false,
-      message: 'Username already exists.',
-    });
+    const handler = await loadHandler(null);
     const response = createResponse();
 
     await handler(
       {
         body: {
-          profileId: '1',
-          username: 'existinguser',
+          email: 'existing.user@example.com',
           password: 'Password123!',
-          role: 'Donee',
+          name: 'Existing User',
+          DOB: '1998-01-01',
+          phoneNum: '0412345678',
+          profileId: '1',
         },
       },
       response
@@ -89,7 +87,7 @@ describe('accountRoutes', () => {
     expect(response.statusCode).toBe(400);
     expect(response.body).toEqual({
       success: false,
-      message: 'Username already exists.',
+      message: 'User Account exists.',
     });
   });
 
@@ -100,10 +98,12 @@ describe('accountRoutes', () => {
     await handler(
       {
         body: {
-          profileId: '1',
-          username: 'newuser',
+          email: 'new.user@example.com',
           password: 'Password123!',
-          role: 'User admin',
+          name: 'New User',
+          DOB: '1998-01-01',
+          phoneNum: '0498765432',
+          profileId: '1',
         },
       },
       response

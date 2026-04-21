@@ -1,4 +1,4 @@
-import CreateProfilePage from '@/feature/profile/boundary/CreateProfilePage';
+import CreateProfilePage from '@/feature/CreateProfile/boundary/CreateProfilePage';
 
 export default function AdminCreateProfilePage() {
   return (

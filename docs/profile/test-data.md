@@ -5,35 +5,29 @@ Provide deterministic profile records for create user profile testing.
 
 ## Sample Profiles
 ```text
-Profile A (existing profile for duplicate email test)
-- name: Existing User
-- email: existing.user@example.com
-- phoneNum: 0412345678
-- address: 123 Test St, Sydney NSW 2000
-- expected use: email already exists scenario
-
-Profile B (new profile for successful creation)
-- name: New User
-- email: new.user@example.com
-- phoneNum: 0498765432
-- address: 456 Example Ave, Melbourne VIC 3000
+Profile A (new profile for successful creation)
+- role: Fundraiser
+- description: Creates fundraising activities
 - expected use: successful profile creation
 
-Profile C (missing email for validation test)
-- name: Incomplete User
-- email: (empty)
-- phoneNum: 0411111111
-- address: 789 Sample Rd, Brisbane QLD 4000
-- expected use: empty email validation scenario
+Profile B (missing role for validation test)
+- role: (empty)
+- description: Creates fundraising activities
+- expected use: empty role validation scenario
+
+Profile C (missing description for validation test)
+- role: Fundraiser
+- description: (empty)
+- expected use: empty description validation scenario
 ```
 
 ## Seed Data Template
 ```sql
-insert into user_profile (name, email, phone_num, address)
+insert into user_profile (role, description)
 values
-  ('Existing User', 'existing.user@example.com', '0412345678', '123 Test St, Sydney NSW 2000');
+  ('Fundraiser', 'Creates fundraising activities');
 ```
 
 ## Data Handling Rules
-- Seed data is used for testing email uniqueness checks.
-- Test profiles should cover both existing and non-existing email scenarios.
+- Test profiles should cover successful insert and `null` failure outcomes.
+- Boundary validation test data must cover missing role and missing description.

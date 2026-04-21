@@ -5,7 +5,15 @@ import { getApiUrl } from '@/lib/api';
 
 type MockLoginResponse = {
   ok: boolean;
-  json: () => Promise<{ success: boolean; message: string; role?: string; username?: string }>;
+  json: () => Promise<{
+    success: boolean;
+    message: string;
+    user?: {
+      email: string;
+      username?: string;
+      role?: string;
+    };
+  }>;
 };
 
 describe('LoginBoundary', () => {
@@ -63,13 +71,13 @@ describe('LoginBoundary', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('shows account not found message from the backend', async () => {
+  it('shows invalid credential message from the backend', async () => {
     const user = userEvent.setup();
     fetchMock.mockResolvedValue({
       ok: false,
       json: async () => ({
         success: false,
-        message: 'Account does not exist.',
+        message: 'Invalid email or password.',
       }),
     });
 
@@ -79,27 +87,8 @@ describe('LoginBoundary', () => {
     await user.type(screen.getByLabelText('Password'), 'AnyPass123!');
     await user.click(screen.getByRole('button', { name: 'Log In' }));
 
-    expect(await screen.findByText('Account does not exist.')).toBeInTheDocument();
+    expect(await screen.findByText('Invalid email or password.')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows invalid password message from the backend', async () => {
-    const user = userEvent.setup();
-    fetchMock.mockResolvedValue({
-      ok: false,
-      json: async () => ({
-        success: false,
-        message: 'Invalid password.',
-      }),
-    });
-
-    render(<LoginBoundary />);
-
-    await user.type(screen.getByLabelText('Email'), 'active.fundraiser@example.com');
-    await user.type(screen.getByLabelText('Password'), 'WrongPassword!');
-    await user.click(screen.getByRole('button', { name: 'Log In' }));
-
-    expect(await screen.findByText('Invalid password.')).toBeInTheDocument();
   });
 
   it('shows a network error when the backend is unavailable', async () => {
@@ -122,8 +111,11 @@ describe('LoginBoundary', () => {
       json: async () => ({
         success: true,
         message: 'Login successful.',
-        role: 'Fundraiser',
-        username: 'jason04',
+        user: {
+          email: 'active.fundraiser@example.com',
+          username: 'active-user',
+          role: 'User admin',
+        },
       }),
     });
 
@@ -148,10 +140,12 @@ describe('LoginBoundary', () => {
       expect(screen.queryByText('Login successful.')).not.toBeInTheDocument();
       expect(screen.queryByText('Redirecting to dashboard...')).not.toBeInTheDocument();
     });
-    expect(localStorage.getItem('userRole')).toBe('Fundraiser');
+    expect(localStorage.getItem('userEmail')).toBe('active.fundraiser@example.com');
+    expect(localStorage.getItem('userUsername')).toBe('active-user');
+    expect(localStorage.getItem('userRole')).toBe('User admin');
   });
 
-  it('passes the returned username to the login success callback', async () => {
+  it('passes the logged-in user to the login success callback', async () => {
     const user = userEvent.setup();
     const onLoginSuccess = jest.fn();
     fetchMock.mockResolvedValue({
@@ -159,8 +153,11 @@ describe('LoginBoundary', () => {
       json: async () => ({
         success: true,
         message: 'Login successful.',
-        role: 'Fundraiser',
-        username: 'jason04',
+        user: {
+          email: 'jason21888@naver.com',
+          username: 'jason04',
+          role: 'User admin',
+        },
       }),
     });
 
@@ -173,8 +170,8 @@ describe('LoginBoundary', () => {
     await waitFor(() => {
       expect(onLoginSuccess).toHaveBeenCalledWith({
         email: 'jason21888@naver.com',
-        role: 'Fundraiser',
         username: 'jason04',
+        role: 'User admin',
       });
     });
   });

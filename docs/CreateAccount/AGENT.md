@@ -6,29 +6,29 @@ This guide applies to create account related work only.
 
 Use this file when the task touches any of the following:
 
-- `frontend/src/feature/account`
+- `frontend/src/feature/CreateAccount`
 - `frontend/src/app/admin/create-account/page.tsx`
-- `backend/src/account`
-- `backend/src/routes/accountRoutes.ts`
-- `backend/src/login/entity/UserAccount.ts`
-- `backend/src/profile/entity/UserProfile.ts`
-- `docs/account`
+- `backend/src/CreateAccount`
+- `backend/src/routes/CreateAccountRoutes.ts`
+- `backend/src/shared/entity/UserAccount.ts`
+- `backend/src/CreateProfile/entity/UserProfile.ts`
+- `docs/CreateAccount`
 
 This file supplements the repository-wide rules in the root `AGENT.md`. Shared architecture, BCE, and TDD rules still come from the root guide.
 
 ## 2. Related Code Locations
 
-- Frontend boundary: `frontend/src/feature/account/boundary/CreateAccountPage.tsx`
+- Frontend boundary: `frontend/src/feature/CreateAccount/boundary/CreateAccountPage.tsx`
 - Frontend page: `frontend/src/app/admin/create-account/page.tsx`
-- Backend controller: `backend/src/account/controller/CreateAccountController.ts`
-- Backend entity: `backend/src/login/entity/UserAccount.ts`
-- Supporting entity: `backend/src/profile/entity/UserProfile.ts`
-- HTTP route adapter: `backend/src/routes/accountRoutes.ts`
+- Backend controller: `backend/src/CreateAccount/controller/CreateAccountController.ts`
+- Backend entity: `backend/src/shared/entity/UserAccount.ts`
+- Supporting entity: `backend/src/CreateProfile/entity/UserProfile.ts`
+- HTTP route adapter: `backend/src/routes/CreateAccountRoutes.ts`
 - Backend tests: `backend/test/controller`, `backend/test/entity`, `backend/test/routes`
 
 ## 3. Related Design Documents
 
-Create account work MUST stay consistent with the design documents in `docs/account/`:
+Create account work MUST stay consistent with the design documents in `docs/CreateAccount/`:
 
 - `user-story.md`
 - `use-case.md`
@@ -81,7 +81,7 @@ If the change is limited to one layer but still affects create account behavior,
 Before considering create account work complete, verify:
 
 - Create account code still matches the create account diagrams and use case wording
-- Boundary validation behavior matches `docs/account/test-cases.md`
+- Boundary validation behavior matches `docs/CreateAccount/test-cases.md`
 - Controller and entity logic remain independently testable
 - Route behavior still maps controller results correctly
 - The linked profile email is persisted into `user_account`

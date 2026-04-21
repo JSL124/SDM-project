@@ -1,13 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AdminNavbar from './AdminNavbar';
-import { displayLoginPage, logout } from '@/feature/logout/boundary/LogoutPage';
+import { logout } from '@/feature/Logout/boundary/LogoutPage';
 
 const pushMock = jest.fn();
 
-jest.mock('@/feature/logout/boundary/LogoutPage', () => ({
+jest.mock('@/feature/Logout/boundary/LogoutPage', () => ({
   logout: jest.fn(),
-  displayLoginPage: jest.fn(),
 }));
 
 jest.mock('next/link', () => ({
@@ -39,12 +38,10 @@ jest.mock('next/navigation', () => ({
 }));
 
 const logoutMock = logout as jest.MockedFunction<typeof logout>;
-const displayLoginPageMock = displayLoginPage as jest.MockedFunction<typeof displayLoginPage>;
 
 describe('AdminNavbar', () => {
   beforeEach(() => {
     logoutMock.mockReset();
-    displayLoginPageMock.mockReset();
     pushMock.mockReset();
     sessionStorage.clear();
     localStorage.clear();
@@ -52,8 +49,6 @@ describe('AdminNavbar', () => {
     localStorage.setItem('userRole', 'User admin');
     localStorage.setItem('userEmail', 'admin@example.com');
     localStorage.setItem('userUsername', 'admin-user');
-
-    displayLoginPageMock.mockImplementation((clearUser) => clearUser());
   });
 
   it('shows a queued login success banner after redirecting to admin pages', () => {
@@ -72,7 +67,7 @@ describe('AdminNavbar', () => {
   });
 
   it('queues a logout success banner before redirecting home', async () => {
-    logoutMock.mockResolvedValue(true);
+    logoutMock.mockResolvedValue(undefined);
     const user = userEvent.setup();
 
     render(<AdminNavbar />);
@@ -82,7 +77,6 @@ describe('AdminNavbar', () => {
 
     await waitFor(() => {
       expect(logoutMock).toHaveBeenCalledTimes(1);
-      expect(displayLoginPageMock).toHaveBeenCalledTimes(1);
       expect(pushMock).toHaveBeenCalledWith('/');
     });
 

@@ -4,42 +4,35 @@
 Create Profile Page
 
 ## Purpose
-Allow a User Admin to enter a new user's personal details and submit the profile for creation.
+Allow a User Admin to enter a profile role and description, then submit the profile for creation.
 
 ## Main UI Elements
 - Page title: `Create User Profile`
-- Name input field
-- Email input field
-- Phone Number input field
-- Address input field
+- Role input field
+- Description input field
 - Create button
 - Status or error message area
 
 ## Text Wireframe
 ```text
 +--------------------------------------------------+
-|              Create User Profile                  |
+|              Create User Profile                 |
 |--------------------------------------------------|
-| Name                                             |
+| Role                                             |
 | [______________________________________________] |
 |                                                  |
-| Email                                            |
+| Description                                      |
+| [______________________________________________] |
 | [______________________________________________] |
 |                                                  |
-| Phone Number                                     |
-| [______________________________________________] |
-|                                                  |
-| Address                                          |
-| [______________________________________________] |
-|                                                  |
-| [              Create Button                   ] |
+| [                    Create                    ] |
 |                                                  |
 | Error or success message appears here            |
 +--------------------------------------------------+
 ```
 
 ## Boundary Responsibilities Reflected in the Wireframe
-- Collect name, email, phone number, and address input
-- Validate that all fields are filled and email format is valid before backend call
+- Collect role and description input
+- Validate that both fields are filled before the backend call
 - Show error messages in the status area
 - Show success feedback when the profile is created

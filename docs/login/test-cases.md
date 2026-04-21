@@ -79,8 +79,8 @@ Steps:
 3. Submit the form.
 
 Expected Result:
-- The controller returns failure.
-- The boundary shows `Account does not exist.`
+- The controller returns `null`.
+- The boundary shows the login error message.
 
 ## TC-LOGIN-06
 Name: Login fails when password is incorrect
@@ -95,8 +95,8 @@ Steps:
 3. Submit the form.
 
 Expected Result:
-- The controller returns failure.
-- The boundary shows `Invalid password.`
+- The controller returns `null`.
+- The boundary shows the login error message.
 
 ## TC-LOGIN-07
 Name: Login fails when backend service is unavailable

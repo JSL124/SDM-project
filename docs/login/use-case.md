@@ -11,8 +11,8 @@ Fundraiser
 
 ## Supporting Components
 - `LoginPage` as the boundary at `frontend/src/feature/login/boundary/LoginBoundary.tsx`
-- `LoginController` as the controller at `backend/src/login/controller/LoginController.ts`
-- `UserAccount` as the entity at `backend/src/login/entity/UserAccount.ts`
+- `LoginController` as the controller at `backend/src/Login/controller/LoginController.ts`
+- `UserAccount` as the entity at `backend/src/shared/entity/UserAccount.ts`
 - `user_account` table in PostgreSQL
 
 ## Preconditions

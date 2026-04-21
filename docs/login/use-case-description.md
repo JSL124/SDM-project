@@ -26,12 +26,11 @@ The fundraiser selects the login option and submits the login form with an email
 3. Before submit, `LoginPage` does not display any success or error message.
 4. `LoginPage` validates that the fields are not empty and that the email format is valid.
 5. `LoginPage` sends the credentials to `LoginController.login(email, password)`.
-6. `LoginController` requests account data by calling `UserAccount.findAccountByEmail(email)`.
-7. `UserAccount` retrieves the matching account record from PostgreSQL.
-8. `LoginController` calls `UserAccount.verifyPassword(password)`.
-9. `UserAccount` confirms that the provided password matches the stored password hash.
-10. `LoginController` returns a successful result and success message to the boundary.
-11. `LoginPage` displays the dashboard.
+6. `LoginController` calls `UserAccount.login(email, password)`.
+7. `UserAccount` retrieves the matching account record from PostgreSQL and checks the password.
+8. `UserAccount` returns `UserAccount` when the credentials match.
+9. `LoginController` returns the `UserAccount` to the boundary.
+10. `LoginPage` displays the dashboard.
 
 ## Alternative Flow A1: Empty Email
 1. The fundraiser submits the form without entering an email.
@@ -53,14 +52,14 @@ The fundraiser selects the login option and submits the login form with an email
 
 ## Alternative Flow A4: Account Does Not Exist
 1. `LoginController` cannot find an account associated with the entered email.
-2. `LoginController` returns a failure result with the message `Account does not exist.`
-3. `LoginPage` displays the message `Account does not exist.`
+2. `LoginController` returns `null`.
+3. `LoginPage` displays the login error message.
 4. The flow ends.
 
 ## Alternative Flow A5: Invalid Password
-1. `LoginController` finds the account but `UserAccount.verifyPassword(password)` returns `false`.
-2. `LoginController` returns a failure result with the message `Invalid password.`
-3. `LoginPage` displays the message `Invalid password.`
+1. `UserAccount.login(email, password)` finds the account but the password does not match.
+2. `LoginController` returns `null`.
+3. `LoginPage` displays the login error message.
 4. The flow ends.
 
 ## Alternative Flow A6: Backend Unavailable

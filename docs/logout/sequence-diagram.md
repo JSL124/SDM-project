@@ -1,20 +1,18 @@
-# Sequence Diagram: Multi-Actor Logout
+# Sequence Diagram: Profile Logout
 
 ```mermaid
 sequenceDiagram
-    actor User as Fundraiser / Donee / User admin / Platform manager
+    actor UserProfile as Logged-in profile
     participant LogoutPage as Boundary: LogoutPage
-    participant LogoutController as Controller: LogoutController
 
-    Note over User,LogoutController: This logout flow is shared by Fundraiser, Donee, User admin, and Platform manager.
+    Note over UserProfile,LogoutPage: This logout flow is shared by every logged-in profile type.
 
-    User->>LogoutPage: Select logout option
-    LogoutPage->>LogoutController: logout()
-    LogoutController-->>LogoutPage: return
-    LogoutPage-->>User: Display login page
+    UserProfile->>LogoutPage: Select logout option
+    LogoutPage->>LogoutPage: logout()
+    LogoutPage-->>UserProfile: Display login page
 ```
 
 ## Design Notes
 - The implemented boundary helper lives at `frontend/src/feature/logout/boundary/LogoutPage.ts`.
-- `LogoutController.logout()` is modeled as `void` in code to match the current class diagram; the HTTP route always returns `{ success: true }` after invoking the controller.
-- `displayLoginPage()` remains a boundary-side transition that clears local UI state after the logout request completes.
+- `LogoutPage.logout()` is modeled as `void` in code to match the current class diagram.
+- No backend route, controller, entity, or database call participates in the current logout sequence.

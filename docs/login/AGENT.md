@@ -7,7 +7,7 @@ This guide applies to login-related work only.
 Use this file when the task touches any of the following:
 
 - `frontend/src/feature/login`
-- `backend/src/login`
+- `backend/src/Login`
 - `docs/login`
 - `backend/src/routes/loginRoutes.ts`
 
@@ -17,8 +17,8 @@ This file supplements the repository-wide rules in the root `AGENT.md`. Shared a
 
 - Frontend boundary: `frontend/src/feature/login/boundary/LoginBoundary.tsx`
 - Frontend composition entry: `frontend/src/components/blocks/login-section.tsx`
-- Backend controller: `backend/src/login/controller/LoginController.ts`
-- Backend entity: `backend/src/login/entity/UserAccount.ts`
+- Backend controller: `backend/src/Login/controller/LoginController.ts`
+- Backend entity: `backend/src/shared/entity/UserAccount.ts`
 - HTTP route adapter: `backend/src/routes/loginRoutes.ts`
 - Backend tests: `backend/test/controller`, `backend/test/entity`, `backend/test/routes`
 
@@ -54,8 +54,8 @@ The automated login test set MUST cover:
 - Empty email
 - Invalid email format
 - Empty password
-- Account does not exist
-- Invalid password
+- Login returns null when account does not exist
+- Login returns null when password is invalid
 - Backend unavailable
 - Successful login
 

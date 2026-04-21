@@ -1,9 +1,9 @@
-describe('profileRoutes', () => {
+describe('CreateProfileRoutes', () => {
   let consoleErrorSpy: jest.SpyInstance;
 
   async function loadHandler(createProfileResult: unknown, shouldReject = false) {
     jest.resetModules();
-    jest.doMock('../../src/profile/controller/CreateProfileController', () => ({
+    jest.doMock('../../src/CreateProfile/controller/CreateProfileController', () => ({
       CreateProfileController: jest.fn().mockImplementation(() => ({
         createProfile: shouldReject
           ? jest.fn().mockRejectedValue(new Error('db down'))
@@ -11,8 +11,8 @@ describe('profileRoutes', () => {
       })),
     }));
 
-    const { default: profileRoutes } = await import('../../src/routes/profileRoutes');
-    return (profileRoutes as any).stack[0].route.stack[0].handle;
+    const { default: CreateProfileRoutes } = await import('../../src/routes/CreateProfileRoutes');
+    return (CreateProfileRoutes as any).stack[0].route.stack[0].handle;
   }
 
   function createResponse() {
@@ -43,18 +43,16 @@ describe('profileRoutes', () => {
 
   it('returns 201 for successful profile creation', async () => {
     const handler = await loadHandler({
-      success: true,
-      message: 'Profile created successfully.',
+      role: 'Fundraiser',
+      description: 'Creates fundraising activities',
     });
     const response = createResponse();
 
     await handler(
       {
         body: {
-          name: 'New User',
-          email: 'new.user@example.com',
-          phoneNum: '0498765432',
-          address: '456 Example Ave',
+          role: 'Fundraiser',
+          description: 'Creates fundraising activities',
         },
       },
       response
@@ -62,61 +60,27 @@ describe('profileRoutes', () => {
 
     expect(response.statusCode).toBe(201);
     expect(response.body).toEqual({
-      success: true,
-      message: 'Profile created successfully.',
-    });
-  });
-
-  it('returns 409 when email already exists', async () => {
-    const handler = await loadHandler({
-      success: false,
-      message: 'Email already exists.',
-    });
-    const response = createResponse();
-
-    await handler(
-      {
-        body: {
-          name: 'Existing User',
-          email: 'existing.user@example.com',
-          phoneNum: '0412345678',
-          address: '123 Test St',
-        },
-      },
-      response
-    );
-
-    expect(response.statusCode).toBe(409);
-    expect(response.body).toEqual({
-      success: false,
-      message: 'Email already exists.',
+      role: 'Fundraiser',
+      description: 'Creates fundraising activities',
     });
   });
 
   it('returns 400 when profile creation fails', async () => {
-    const handler = await loadHandler({
-      success: false,
-      message: 'Failed to create profile.',
-    });
+    const handler = await loadHandler(null);
     const response = createResponse();
 
     await handler(
       {
         body: {
-          name: 'New User',
-          email: 'new.user@example.com',
-          phoneNum: '0498765432',
-          address: '456 Example Ave',
+          role: 'Fundraiser',
+          description: 'Creates fundraising activities',
         },
       },
       response
     );
 
     expect(response.statusCode).toBe(400);
-    expect(response.body).toEqual({
-      success: false,
-      message: 'Failed to create profile.',
-    });
+    expect(response.body).toBeNull();
   });
 
   it('returns 500 when the controller throws an error', async () => {
@@ -126,20 +90,15 @@ describe('profileRoutes', () => {
     await handler(
       {
         body: {
-          name: 'New User',
-          email: 'new.user@example.com',
-          phoneNum: '0498765432',
-          address: '456 Example Ave',
+          role: 'Fundraiser',
+          description: 'Creates fundraising activities',
         },
       },
       response
     );
 
     expect(response.statusCode).toBe(500);
-    expect(response.body).toEqual({
-      success: false,
-      message: 'Unable to connect to server.',
-    });
+    expect(response.body).toBeNull();
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'Create profile request failed:',
       expect.any(Error)

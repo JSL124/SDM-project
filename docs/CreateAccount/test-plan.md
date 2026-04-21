@@ -23,7 +23,7 @@ Excluded:
 ## Test Levels
 - Unit tests for `UserAccount` entity methods (`existsByUsername`, `saveAccount`)
 - Unit tests for `CreateAccountController` create account logic
-- Component or UI tests for `CreateAccountPage` boundary validation and access behavior at `frontend/src/feature/account/boundary/CreateAccountPage.tsx`
+- Component or UI tests for `CreateAccountPage` boundary validation and access behavior at `frontend/src/feature/CreateAccount/boundary/CreateAccountPage.tsx`
 - Route tests for `POST /api/account` response mapping
 
 ## Entry Criteria

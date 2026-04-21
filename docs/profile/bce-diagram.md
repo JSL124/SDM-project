@@ -4,26 +4,20 @@
 classDiagram
     class CreateProfilePage {
         <<Boundary>>
-        +submitProfile(name: String, email: String, phoneNum: String, address: String) void
-        +validateInput(name: String, email: String, phoneNum: String, address: String) boolean
         +displaySuccess() void
-        +displayError(message: String) void
+        +displayError() void
     }
 
     class CreateProfileController {
         <<Controller>>
-        +createProfile(name: String, email: String, phoneNum: String, address: String) boolean
+        +createProfile(role: String, description: String) UserProfile
     }
 
     class UserProfile {
         <<Entity>>
-        -profileId: String
-        -name: String
-        -email: String
-        -phoneNum: String
-        -address: String
-        +existsByEmail(email: String) boolean
-        +saveProfile(name: String, email: String, phoneNum: String, address: String) boolean
+        -role: String
+        -description: String
+        +createProfile(role: String, description: String) UserProfile
     }
 
     CreateProfilePage --> CreateProfileController
@@ -31,9 +25,9 @@ classDiagram
 ```
 
 ## BCE Role Mapping
-- Boundary: Next.js create profile page component at `frontend/src/feature/profile/boundary/CreateProfilePage.tsx` that gathers input, validates user input, and shows success or error feedback.
-- HTTP API route: Express route adapter at `backend/src/routes/profileRoutes.ts` that maps the HTTP request to the controller and returns the controller result.
-- Controller: TypeScript create profile controller class at `backend/src/profile/controller/CreateProfileController.ts` that coordinates the create profile use case.
-- Entity: TypeScript user profile entity class at `backend/src/profile/entity/UserProfile.ts` that represents persisted profile data and handles email uniqueness checks and profile saving.
+- Boundary: Next.js create profile page component at `frontend/src/feature/CreateProfile/boundary/CreateProfilePage.tsx` that gathers role and description, validates input, and shows success or error feedback.
+- HTTP API route: Express route adapter at `backend/src/routes/CreateProfileRoutes.ts` that maps the HTTP request to the controller and returns `UserProfile` or `null`.
+- Controller: TypeScript create profile controller class at `backend/src/CreateProfile/controller/CreateProfileController.ts` that coordinates the create profile use case.
+- Entity: TypeScript user profile entity class at `backend/src/CreateProfile/entity/UserProfile.ts` that represents persisted profile data and handles the insert.
 - Database: PostgreSQL `user_profile` table used by the entity layer.
 - Boundary rule: No success or error message is displayed before the User Admin submits the create profile form.

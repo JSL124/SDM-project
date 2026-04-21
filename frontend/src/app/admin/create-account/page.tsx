@@ -1,4 +1,4 @@
-import CreateAccountPage from '@/feature/account/boundary/CreateAccountPage';
+import CreateAccountPage from '@/feature/CreateAccount/boundary/CreateAccountPage';
 
 export default function AdminCreateAccountPage() {
   return (

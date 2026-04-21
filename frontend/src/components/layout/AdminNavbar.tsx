@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { consumeFlashBanner, queueFlashBanner } from '@/lib/flashBanner';
-import { displayLoginPage, logout } from '@/feature/logout/boundary/LogoutPage';
+import { logout } from '@/feature/Logout/boundary/LogoutPage';
 import { hasRole } from '@/lib/auth';
 
 type StoredUser = {
@@ -88,16 +88,9 @@ export default function AdminNavbar() {
   const avatarLetter = (displayName[0] ?? storedUser.email[0] ?? '?').toUpperCase();
 
   async function handleLogout(): Promise<void> {
-    const didLogout = await logout();
-    if (!didLogout) return;
+    await logout();
     setMenuOpen(false);
     setProfileMenuOpen(false);
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userUsername');
-    displayLoginPage(() => {
-      /* AdminNavbar reads from localStorage; nothing to clear in React state */
-    });
     queueFlashBanner({
       message: 'You have successfully signed out of FundRaise.',
       durationMs: LOGOUT_SUCCESS_BANNER_MS,

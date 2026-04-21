@@ -1,13 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Navbar from './Navbar';
-import { displayLoginPage, logout } from '@/feature/logout/boundary/LogoutPage';
+import { logout } from '@/feature/Logout/boundary/LogoutPage';
 
 const pushMock = jest.fn();
 
-jest.mock('@/feature/logout/boundary/LogoutPage', () => ({
+jest.mock('@/feature/Logout/boundary/LogoutPage', () => ({
   logout: jest.fn(),
-  displayLoginPage: jest.fn(),
 }));
 
 jest.mock('@/components/ui/LoginModal', () => ({
@@ -62,7 +61,6 @@ jest.mock('next/navigation', () => ({
 }));
 
 const logoutMock = logout as jest.MockedFunction<typeof logout>;
-const displayLoginPageMock = displayLoginPage as jest.MockedFunction<typeof displayLoginPage>;
 
 function setStoredUser(role: 'User admin' | 'Fundraiser' = 'Fundraiser') {
   localStorage.setItem('userRole', role);
@@ -74,9 +72,7 @@ describe('Navbar', () => {
   beforeEach(() => {
     localStorage.clear();
     logoutMock.mockReset();
-    displayLoginPageMock.mockReset();
     pushMock.mockReset();
-    displayLoginPageMock.mockImplementation((clearUser) => clearUser());
   });
 
   async function logInThroughNavbar(role: 'User admin' | 'Fundraiser' = 'User admin') {
@@ -147,7 +143,7 @@ describe('Navbar', () => {
   });
 
   it('clears the navbar back to logo-only after successful logout', async () => {
-    logoutMock.mockResolvedValue(true);
+    logoutMock.mockResolvedValue(undefined);
     setStoredUser();
     render(<Navbar />);
 
@@ -157,7 +153,6 @@ describe('Navbar', () => {
 
     await waitFor(() => {
       expect(logoutMock).toHaveBeenCalledTimes(1);
-      expect(displayLoginPageMock).toHaveBeenCalledTimes(1);
       expect(pushMock).toHaveBeenCalledWith('/');
     });
 
@@ -168,29 +163,16 @@ describe('Navbar', () => {
     expect(screen.getByText('You have successfully signed out of FundRaise.')).toBeInTheDocument();
   });
 
-  it('keeps the user visible when logout fails', async () => {
-    logoutMock.mockResolvedValue(false);
-    setStoredUser();
-    render(<Navbar />);
-
-    const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
-    fireEvent.focus(profileTrigger);
-    fireEvent.mouseDown(screen.getByRole('menuitem', { name: 'Sign out' }));
-
-    await waitFor(() => {
-      expect(logoutMock).toHaveBeenCalledTimes(1);
-    });
-
-    expect(displayLoginPageMock).not.toHaveBeenCalled();
-    expect(pushMock).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Open profile menu for jason04' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Fundraising Activities' })).toBeInTheDocument();
-  });
-
   it('allows login through the sign in button', async () => {
     await logInThroughNavbar('Fundraiser');
 
     expect(screen.getByRole('button', { name: 'Open profile menu for jason04' })).toBeInTheDocument();
     expect(screen.getByText('You have successfully signed in to FundRaise.')).toBeInTheDocument();
+  });
+
+  it('redirects user admins to the account management tab after login', async () => {
+    await logInThroughNavbar('User admin');
+
+    expect(pushMock).toHaveBeenCalledWith('/admin/manage-users?tab=account');
   });
 });

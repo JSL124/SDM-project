@@ -6,20 +6,20 @@ This guide applies to create user profile related work only.
 
 Use this file when the task touches any of the following:
 
-- `frontend/src/feature/profile`
-- `backend/src/profile`
+- `frontend/src/feature/CreateProfile`
+- `backend/src/CreateProfile`
 - `docs/profile`
-- `backend/src/routes/profileRoutes.ts`
+- `backend/src/routes/CreateProfileRoutes.ts`
 
 This file supplements the repository-wide rules in the root `AGENT.md`. Shared architecture, BCE, and TDD rules still come from the root guide.
 
 ## 2. Related Code Locations
 
-- Frontend boundary: `frontend/src/feature/profile/boundary/CreateProfilePage.tsx`
+- Frontend boundary: `frontend/src/feature/CreateProfile/boundary/CreateProfilePage.tsx`
 - Frontend page: `frontend/src/app/admin/create-profile/page.tsx`
-- Backend controller: `backend/src/profile/controller/CreateProfileController.ts`
-- Backend entity: `backend/src/profile/entity/UserProfile.ts`
-- HTTP route adapter: `backend/src/routes/profileRoutes.ts`
+- Backend controller: `backend/src/CreateProfile/controller/CreateProfileController.ts`
+- Backend entity: `backend/src/CreateProfile/entity/UserProfile.ts`
+- HTTP route adapter: `backend/src/routes/CreateProfileRoutes.ts`
 - Backend tests: `backend/test/controller`, `backend/test/entity`, `backend/test/routes`
 
 ## 3. Related Design Documents
@@ -43,7 +43,8 @@ Create profile work MUST stay consistent with the design documents in `docs/prof
 - Create profile work MUST preserve BCE separation across boundary, controller, entity, and database access
 - Create profile boundary validation MUST happen before the backend call
 - Create profile route handlers stay thin and only map HTTP requests to controller calls
-- Create profile specific success and failure messages MUST remain consistent with the approved design artifacts
+- Create profile success MUST be based on a non-null `UserProfile`
+- Create profile failure MUST be based on a `null` result
 - Create profile changes MUST NOT bypass the dedicated profile controller or access the entity directly from the frontend
 
 ## 5. Required Create Profile Test Coverage
@@ -51,14 +52,11 @@ Create profile work MUST stay consistent with the design documents in `docs/prof
 The automated create profile test set MUST cover:
 
 - No message before submit
-- Empty name
-- Empty email
-- Invalid email format
-- Empty phone number
-- Empty address
-- Email already exists
+- Empty role
+- Empty description
+- Backend returns `null`
 - Backend unavailable
-- Successful profile creation
+- Successful profile creation returning `UserProfile`
 
 ## 6. Local Quality Gate for Create Profile Changes
 

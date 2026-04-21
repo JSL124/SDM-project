@@ -1,28 +1,22 @@
-# BCE Diagram: Multi-Actor Logout
+# BCE Diagram: Profile Logout
 
 ```mermaid
 classDiagram
     class LogoutPage {
         <<Boundary>>
-        +displayLoginPage() void
-    }
-
-    class LogoutController {
-        <<Controller>>
         +logout() void
     }
-
-    LogoutPage --> LogoutController
 ```
 
 ## BCE Role Mapping
-- Boundary: `LogoutPage` is the logout boundary used by `Fundraiser`, `Donee`, `User admin`, and `Platform manager` to initiate logout and return to the login page.
-- Controller: `LogoutController` coordinates the logout use case after receiving the request from `LogoutPage`.
-- Entity: No entity is shown in the current logout design artifact because the provided logout flow is boundary-controller focused.
+- Actor: Any logged-in profile type can initiate logout.
+- Boundary: `LogoutPage` is the logout boundary used by any logged-in profile type to end the current login state and return to the login page.
+- Controller: No controller is shown in the current logout design artifact.
+- Entity: No entity is shown in the current logout design artifact.
 - Database: No direct database interaction is shown in the current logout design artifact.
-- Shared actor rule: The same `LogoutPage` and `LogoutController` flow applies to `Fundraiser`, `Donee`, `User admin`, and `Platform manager`.
+- Shared actor rule: The same `LogoutPage.logout()` flow applies to every logged-in profile type.
 
 ## Design Notes
-- The class diagram follows the provided logout diagram where `LogoutPage` exposes `displayLoginPage(): void` and delegates logout processing to `LogoutController.logout(): void`.
+- The class diagram follows the provided logout diagram where `LogoutPage` exposes `logout(): void`.
 - The implemented boundary helper file is `frontend/src/feature/logout/boundary/LogoutPage.ts`.
-- The HTTP route `POST /api/logout` is the adapter that connects the boundary-side logout action to `LogoutController.logout()`.
+- Logout is a boundary-only operation in this design because the current implementation stores login state in the browser and has no server-side session invalidation.

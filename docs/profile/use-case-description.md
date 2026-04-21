@@ -7,7 +7,7 @@
 Create User Profile
 
 ## Description
-This use case allows the User Admin to create a new user profile by entering the user's personal details into the system.
+This use case allows the User Admin to create a new user profile by entering a role and description into the system.
 
 ## Trigger
 The User Admin selects the "Create User Profile" option from the system interface.
@@ -18,21 +18,16 @@ The User Admin selects the "Create User Profile" option from the system interfac
 ## Preconditions
 - The User Admin needs to be logged in.
 - The User Admin needs to have permission to manage users.
-- The user account does not already exist.
 
 ## Normal Flow
-1. The User Admin enters the new user's personal information.
+1. The User Admin enters the profile role and description.
 2. The User Admin clicks the Create button.
-3. The system validates the entered profile details.
-4. The system saves the new user profile.
-5. The system displays a success message confirming that the user profile has been created.
+3. The system sends `role` and `description` to the CreateProfile controller.
+4. The controller asks the UserProfile entity to create the profile.
+5. The system displays a success message when a `UserProfile` is returned.
 
 ## Alternative Flow
 
-### 3a. Invalid or incomplete information entered
-- The system detects invalid or missing input.
-- The system displays an error message.
-
-### 3b. Email already exists
-- The system detects that the email is already in use.
+### 5a. Profile creation fails
+- The UserProfile entity returns `null`.
 - The system displays an error message.

@@ -1,33 +1,7 @@
-import { UserAccount } from '../entity/UserAccount';
-
-export type LoginResult =
-  | { success: true; message: 'Login successful.'; role: string; username: string }
-  | { success: false; message: 'Account does not exist.' }
-  | { success: false; message: 'Invalid password.' };
+import { UserAccount } from '../../shared/entity/UserAccount';
 
 export class LoginController {
-  async login(email: string, password: string): Promise<LoginResult> {
-    const account = await UserAccount.findAccountByEmail(email);
-    if (account === null) {
-      return {
-        success: false,
-        message: 'Account does not exist.',
-      };
-    }
-
-    const isValidPassword = await account.verifyPassword(password);
-    if (!isValidPassword) {
-      return {
-        success: false,
-        message: 'Invalid password.',
-      };
-    }
-
-    return {
-      success: true,
-      message: 'Login successful.',
-      role: account.getRole(),
-      username: account.getUsername(),
-    };
+  async login(email: string, password: string): Promise<UserAccount | null> {
+    return UserAccount.login(email, password);
   }
 }

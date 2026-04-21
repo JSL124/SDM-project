@@ -1,8 +1,7 @@
-import { CreateProfileController } from '../../src/profile/controller/CreateProfileController';
-import { UserProfile } from '../../src/profile/entity/UserProfile';
+import { CreateProfileController } from '../../src/CreateProfile/controller/CreateProfileController';
+import { UserProfile } from '../../src/CreateProfile/entity/UserProfile';
 
-// Mock the UserProfile entity
-jest.mock('../../src/profile/entity/UserProfile');
+jest.mock('../../src/CreateProfile/entity/UserProfile');
 
 describe('CreateProfileController', () => {
   let controller: CreateProfileController;
@@ -12,42 +11,21 @@ describe('CreateProfileController', () => {
     jest.clearAllMocks();
   });
 
-  it('should return success when email does not exist and save succeeds', async () => {
-    (UserProfile.existsByEmail as jest.Mock).mockResolvedValue(false);
-    (UserProfile.saveProfile as jest.Mock).mockResolvedValue(true);
+  it('should return UserProfile when profile is created', async () => {
+    const profile = new UserProfile('Fundraiser', 'Creates fundraising activities');
+    (UserProfile.createProfile as jest.Mock).mockResolvedValue(profile);
 
-    const result = await controller.createProfile('New User', 'new.user@example.com', '0498765432', '456 Example Ave');
+    const result = await controller.createProfile('Fundraiser', 'Creates fundraising activities');
 
-    expect(result).toEqual({
-      success: true,
-      message: 'Profile created successfully.',
-    });
-    expect(UserProfile.existsByEmail).toHaveBeenCalledWith('new.user@example.com');
-    expect(UserProfile.saveProfile).toHaveBeenCalledWith('New User', 'new.user@example.com', '0498765432', '456 Example Ave');
+    expect(result).toBe(profile);
+    expect(UserProfile.createProfile).toHaveBeenCalledWith('Fundraiser', 'Creates fundraising activities');
   });
 
-  it('should return failure when email already exists', async () => {
-    (UserProfile.existsByEmail as jest.Mock).mockResolvedValue(true);
+  it('should return null when profile creation fails', async () => {
+    (UserProfile.createProfile as jest.Mock).mockResolvedValue(null);
 
-    const result = await controller.createProfile('Existing User', 'existing.user@example.com', '0412345678', '123 Test St');
+    const result = await controller.createProfile('Fundraiser', 'Creates fundraising activities');
 
-    expect(result).toEqual({
-      success: false,
-      message: 'Email already exists.',
-    });
-    expect(UserProfile.existsByEmail).toHaveBeenCalledWith('existing.user@example.com');
-    expect(UserProfile.saveProfile).not.toHaveBeenCalled();
-  });
-
-  it('should return failure when save fails', async () => {
-    (UserProfile.existsByEmail as jest.Mock).mockResolvedValue(false);
-    (UserProfile.saveProfile as jest.Mock).mockResolvedValue(false);
-
-    const result = await controller.createProfile('New User', 'new.user@example.com', '0498765432', '456 Example Ave');
-
-    expect(result).toEqual({
-      success: false,
-      message: 'Failed to create profile.',
-    });
+    expect(result).toBeNull();
   });
 });

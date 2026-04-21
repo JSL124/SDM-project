@@ -1,52 +1,19 @@
-import { getApiUrl } from '@/lib/api';
-import { displayLoginPage, logout } from './LogoutPage';
-
-type MockLogoutResponse = {
-  ok: boolean;
-  json: () => Promise<{ success: boolean }>;
-};
+import { logout } from './LogoutPage';
 
 describe('LogoutPage', () => {
-  const fetchMock = jest.fn<Promise<MockLogoutResponse>, [RequestInfo | URL, RequestInit?]>();
-
   beforeEach(() => {
-    fetchMock.mockReset();
-    global.fetch = fetchMock as unknown as typeof fetch;
+    localStorage.clear();
   });
 
-  it('returns true when the backend logout succeeds', async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => ({ success: true }),
-    });
+  it('clears stored login state when logout succeeds', async () => {
+    localStorage.setItem('userRole', 'Fundraiser');
+    localStorage.setItem('userEmail', 'active.fundraiser@example.com');
+    localStorage.setItem('userUsername', 'jason04');
 
-    await expect(logout()).resolves.toBe(true);
-    expect(fetchMock).toHaveBeenCalledWith(getApiUrl('/api/logout'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-  });
+    await expect(logout()).resolves.toBeUndefined();
 
-  it('returns false when the backend logout fails', async () => {
-    fetchMock.mockResolvedValue({
-      ok: false,
-      json: async () => ({ success: false }),
-    });
-
-    await expect(logout()).resolves.toBe(false);
-  });
-
-  it('returns false on network error', async () => {
-    fetchMock.mockRejectedValue(new Error('Network failure'));
-
-    await expect(logout()).resolves.toBe(false);
-  });
-
-  it('clears the login state through displayLoginPage', () => {
-    const clearUser = jest.fn();
-
-    displayLoginPage(clearUser);
-
-    expect(clearUser).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem('userRole')).toBeNull();
+    expect(localStorage.getItem('userEmail')).toBeNull();
+    expect(localStorage.getItem('userUsername')).toBeNull();
   });
 });

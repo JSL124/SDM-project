@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import LoginBoundary from '@/feature/login/boundary/LoginBoundary';
+import LoginBoundary from '@/feature/Login/boundary/LoginBoundary';
 
 interface LoginModalProps {
   open: boolean;

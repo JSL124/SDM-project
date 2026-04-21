@@ -3,7 +3,7 @@ describe('loginRoutes', () => {
 
   async function loadHandler(loginResult: unknown, shouldReject = false) {
     jest.resetModules();
-    jest.doMock('../../src/login/controller/LoginController', () => ({
+    jest.doMock('../../src/Login/controller/LoginController', () => ({
       LoginController: jest.fn().mockImplementation(() => ({
         login: shouldReject
           ? jest.fn().mockRejectedValue(new Error('db down'))
@@ -43,11 +43,12 @@ describe('loginRoutes', () => {
 
   it('returns 200 for successful login', async () => {
     const handler = await loadHandler({
-      success: true,
-      message: 'Login successful.',
-      role: 'Fundraiser',
-      username: 'jason04',
-    });
+      getLoginUser: () => ({
+        email: 'active.fundraiser@example.com',
+        username: 'active-user',
+        role: 'User admin',
+      }),
+    } as unknown);
     const response = createResponse();
 
     await handler(
@@ -64,16 +65,16 @@ describe('loginRoutes', () => {
     expect(response.body).toEqual({
       success: true,
       message: 'Login successful.',
-      role: 'Fundraiser',
-      username: 'jason04',
+      user: {
+        email: 'active.fundraiser@example.com',
+        username: 'active-user',
+        role: 'User admin',
+      },
     });
   });
 
-  it('returns 401 for account not found', async () => {
-    const handler = await loadHandler({
-      success: false,
-      message: 'Account does not exist.',
-    });
+  it('returns 401 for invalid email or password', async () => {
+    const handler = await loadHandler(null);
     const response = createResponse();
 
     await handler(
@@ -89,7 +90,7 @@ describe('loginRoutes', () => {
     expect(response.statusCode).toBe(401);
     expect(response.body).toEqual({
       success: false,
-      message: 'Account does not exist.',
+      message: 'Invalid email or password.',
     });
   });
 
