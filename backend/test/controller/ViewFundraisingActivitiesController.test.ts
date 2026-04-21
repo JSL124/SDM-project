@@ -35,20 +35,20 @@ describe('ViewFundraisingActivitiesController', () => {
     });
   });
 
-  describe('getFundraisingActivityDetails', () => {
+  describe('viewFundraisingActivityDetails', () => {
     it('should return activity when found', async () => {
-      (FundraisingActivity.retrieveFundraisingActivityDetails as jest.Mock).mockResolvedValue(mockActivity);
+      (FundraisingActivity.viewFundraisingActivityDetails as jest.Mock).mockResolvedValue(mockActivity);
 
-      const result = await controller.getFundraisingActivityDetails('1');
+      const result = await controller.viewFundraisingActivityDetails('1');
 
       expect(result).toBe(mockActivity);
-      expect(FundraisingActivity.retrieveFundraisingActivityDetails).toHaveBeenCalledWith('1');
+      expect(FundraisingActivity.viewFundraisingActivityDetails).toHaveBeenCalledWith('1');
     });
 
     it('should return null when activity is not found', async () => {
-      (FundraisingActivity.retrieveFundraisingActivityDetails as jest.Mock).mockResolvedValue(null);
+      (FundraisingActivity.viewFundraisingActivityDetails as jest.Mock).mockResolvedValue(null);
 
-      const result = await controller.getFundraisingActivityDetails('999');
+      const result = await controller.viewFundraisingActivityDetails('999');
 
       expect(result).toBeNull();
     });

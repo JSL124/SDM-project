@@ -13,14 +13,8 @@ export class CreateFundraisingActivityController {
     startDate: string,
     endDate: string,
   ): Promise<CreateFundraisingActivityResult> {
-    const saved = await FundraisingActivity.saveFundraisingActivity(
-      title,
-      description,
-      targetAmount,
-      category,
-      startDate,
-      endDate,
-    );
+    const activity = new FundraisingActivity('', title, description, targetAmount, category, startDate, endDate, 'PENDING');
+    const saved = await activity.saveFundraisingActivity();
 
     if (!saved) {
       return { success: false, message: 'Failed to create fundraising activity.' };

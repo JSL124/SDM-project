@@ -3,6 +3,8 @@ import { FundraisingActivity } from '../../src/fundraising/entity/FundraisingAct
 
 jest.mock('../../src/fundraising/entity/FundraisingActivity');
 
+const MockFundraisingActivity = FundraisingActivity as unknown as jest.Mock;
+
 describe('CreateFundraisingActivityController', () => {
   let controller: CreateFundraisingActivityController;
 
@@ -21,25 +23,22 @@ describe('CreateFundraisingActivityController', () => {
   });
 
   it('should return success when save succeeds', async () => {
-    (FundraisingActivity.saveFundraisingActivity as jest.Mock).mockResolvedValue(true);
+    const saveMock = jest.fn().mockResolvedValue(true);
+    MockFundraisingActivity.mockImplementation(() => ({ saveFundraisingActivity: saveMock }));
 
     const result = await controller.createFundraisingActivity(...validArgs);
 
-    expect(result).toEqual({
-      success: true,
-      message: 'Fundraising activity created successfully.',
-    });
-    expect(FundraisingActivity.saveFundraisingActivity).toHaveBeenCalledWith(...validArgs);
+    expect(result).toEqual({ success: true, message: 'Fundraising activity created successfully.' });
+    expect(MockFundraisingActivity).toHaveBeenCalledWith('', ...validArgs, 'PENDING');
+    expect(saveMock).toHaveBeenCalled();
   });
 
   it('should return failure when save returns false', async () => {
-    (FundraisingActivity.saveFundraisingActivity as jest.Mock).mockResolvedValue(false);
+    const saveMock = jest.fn().mockResolvedValue(false);
+    MockFundraisingActivity.mockImplementation(() => ({ saveFundraisingActivity: saveMock }));
 
     const result = await controller.createFundraisingActivity(...validArgs);
 
-    expect(result).toEqual({
-      success: false,
-      message: 'Failed to create fundraising activity.',
-    });
+    expect(result).toEqual({ success: false, message: 'Failed to create fundraising activity.' });
   });
 });

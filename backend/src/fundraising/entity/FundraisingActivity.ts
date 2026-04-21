@@ -81,7 +81,7 @@ export class FundraisingActivity {
     );
   }
 
-  static async retrieveFundraisingActivityDetails(activityID: string): Promise<FundraisingActivity | null> {
+  static async viewFundraisingActivityDetails(activityID: string): Promise<FundraisingActivity | null> {
     const sql =
       'SELECT activity_id, title, description, target_amount, category, start_date, end_date, status FROM fundraising_activity WHERE activity_id = $1';
     const result = await query(sql, [activityID]);
@@ -99,18 +99,11 @@ export class FundraisingActivity {
     );
   }
 
-  static async saveFundraisingActivity(
-    title: string,
-    description: string,
-    targetAmount: number,
-    category: string,
-    startDate: string,
-    endDate: string,
-  ): Promise<boolean> {
+  async saveFundraisingActivity(): Promise<boolean> {
     try {
       const sql =
         'INSERT INTO fundraising_activity (title, description, target_amount, category, start_date, end_date) VALUES ($1, $2, $3, $4, $5, $6)';
-      await query(sql, [title, description, targetAmount, category, startDate, endDate]);
+      await query(sql, [this.title, this.description, this.targetAmount, this.category, this.startDate, this.endDate]);
       return true;
     } catch {
       return false;

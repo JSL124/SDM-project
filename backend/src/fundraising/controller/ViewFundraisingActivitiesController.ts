@@ -5,7 +5,7 @@ export class ViewFundraisingActivitiesController {
     return FundraisingActivity.retrieveFundraisingActivities();
   }
 
-  async getFundraisingActivityDetails(activityID: string): Promise<FundraisingActivity | null> {
-    return FundraisingActivity.retrieveFundraisingActivityDetails(activityID);
+  async viewFundraisingActivityDetails(activityID: string): Promise<FundraisingActivity | null> {
+    return FundraisingActivity.viewFundraisingActivityDetails(activityID);
   }
 }

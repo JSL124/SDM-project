@@ -43,7 +43,7 @@ router.get('/api/fundraising-activity', async (req: Request, res: Response) => {
 router.get('/api/fundraising-activity/:activityID', async (req: Request, res: Response) => {
   try {
     const activityID = String(req.params.activityID);
-    const activity = await viewFundraisingActivitiesController.getFundraisingActivityDetails(activityID);
+    const activity = await viewFundraisingActivitiesController.viewFundraisingActivityDetails(activityID);
     if (activity === null) {
       res.status(404).json({ success: false, message: 'Activity not found.' });
       return;
