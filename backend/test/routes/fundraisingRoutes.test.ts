@@ -48,7 +48,7 @@ describe('fundraisingRoutes', () => {
 
     jest.doMock('../../src/fundraising/controller/ViewFundraisingActivitiesController', () => ({
       ViewFundraisingActivitiesController: jest.fn().mockImplementation(() => ({
-        getFundraisingActivities: getFundraisingActivitiesMock,
+        viewFundraisingActivities: getFundraisingActivitiesMock,
         viewFundraisingActivityDetails: getFundraisingActivityDetailsMock,
       })),
     }));

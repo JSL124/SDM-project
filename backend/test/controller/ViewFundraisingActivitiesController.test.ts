@@ -15,21 +15,21 @@ describe('ViewFundraisingActivitiesController', () => {
     jest.clearAllMocks();
   });
 
-  describe('getFundraisingActivities', () => {
+  describe('viewFundraisingActivities', () => {
     it('should return list of activities from entity', async () => {
-      (FundraisingActivity.retrieveFundraisingActivities as jest.Mock).mockResolvedValue([mockActivity]);
+      (FundraisingActivity.viewFundraisingActivities as jest.Mock).mockResolvedValue([mockActivity]);
 
-      const result = await controller.getFundraisingActivities();
+      const result = await controller.viewFundraisingActivities();
 
       expect(result).toHaveLength(1);
       expect(result[0]).toBe(mockActivity);
-      expect(FundraisingActivity.retrieveFundraisingActivities).toHaveBeenCalledTimes(1);
+      expect(FundraisingActivity.viewFundraisingActivities).toHaveBeenCalledTimes(1);
     });
 
     it('should return empty list when there are no activities', async () => {
-      (FundraisingActivity.retrieveFundraisingActivities as jest.Mock).mockResolvedValue([]);
+      (FundraisingActivity.viewFundraisingActivities as jest.Mock).mockResolvedValue([]);
 
-      const result = await controller.getFundraisingActivities();
+      const result = await controller.viewFundraisingActivities();
 
       expect(result).toEqual([]);
     });

@@ -62,7 +62,7 @@ export class FundraisingActivity {
     return this.status;
   }
 
-  static async retrieveFundraisingActivities(): Promise<FundraisingActivity[]> {
+  static async viewFundraisingActivities(): Promise<FundraisingActivity[]> {
     const sql =
       'SELECT activity_id, title, description, target_amount, category, start_date, end_date, status FROM fundraising_activity ORDER BY created_at DESC';
     const result = await query(sql, []);

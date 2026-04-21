@@ -1,8 +1,8 @@
 import { FundraisingActivity } from '../entity/FundraisingActivity';
 
 export class ViewFundraisingActivitiesController {
-  async getFundraisingActivities(): Promise<FundraisingActivity[]> {
-    return FundraisingActivity.retrieveFundraisingActivities();
+  async viewFundraisingActivities(): Promise<FundraisingActivity[]> {
+    return FundraisingActivity.viewFundraisingActivities();
   }
 
   async viewFundraisingActivityDetails(activityID: string): Promise<FundraisingActivity | null> {
