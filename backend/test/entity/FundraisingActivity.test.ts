@@ -46,14 +46,17 @@ describe('FundraisingActivity', () => {
         fields: [],
       });
 
-      const saved = await FundraisingActivity.saveFundraisingActivity(
+      const activity = new FundraisingActivity(
+        '',
         'Help the Community',
         'A fundraiser to support local shelters.',
         5000,
         'Community',
         '2026-05-01',
         '2026-06-01',
+        'PENDING',
       );
+      const saved = await activity.saveFundraisingActivity();
 
       expect(saved).toBe(true);
       expect(mockQuery).toHaveBeenCalledWith(
@@ -65,14 +68,17 @@ describe('FundraisingActivity', () => {
     it('should return false when insert fails', async () => {
       mockQuery.mockRejectedValue(new Error('DB connection error'));
 
-      const saved = await FundraisingActivity.saveFundraisingActivity(
+      const activity = new FundraisingActivity(
+        '',
         'Help the Community',
         'A fundraiser to support local shelters.',
         5000,
         'Community',
         '2026-05-01',
         '2026-06-01',
+        'PENDING',
       );
+      const saved = await activity.saveFundraisingActivity();
 
       expect(saved).toBe(false);
     });

@@ -15,40 +15,40 @@ describe('ViewFundraisingActivitiesController', () => {
     jest.clearAllMocks();
   });
 
-  describe('getFundraisingActivities', () => {
+  describe('viewFundraisingActivities', () => {
     it('should return list of activities from entity', async () => {
-      (FundraisingActivity.retrieveFundraisingActivities as jest.Mock).mockResolvedValue([mockActivity]);
+      (FundraisingActivity.viewFundraisingActivities as jest.Mock).mockResolvedValue([mockActivity]);
 
-      const result = await controller.getFundraisingActivities();
+      const result = await controller.viewFundraisingActivities();
 
       expect(result).toHaveLength(1);
       expect(result[0]).toBe(mockActivity);
-      expect(FundraisingActivity.retrieveFundraisingActivities).toHaveBeenCalledTimes(1);
+      expect(FundraisingActivity.viewFundraisingActivities).toHaveBeenCalledTimes(1);
     });
 
     it('should return empty list when there are no activities', async () => {
-      (FundraisingActivity.retrieveFundraisingActivities as jest.Mock).mockResolvedValue([]);
+      (FundraisingActivity.viewFundraisingActivities as jest.Mock).mockResolvedValue([]);
 
-      const result = await controller.getFundraisingActivities();
+      const result = await controller.viewFundraisingActivities();
 
       expect(result).toEqual([]);
     });
   });
 
-  describe('getFundraisingActivityDetails', () => {
+  describe('viewFundraisingActivityDetails', () => {
     it('should return activity when found', async () => {
-      (FundraisingActivity.retrieveFundraisingActivityDetails as jest.Mock).mockResolvedValue(mockActivity);
+      (FundraisingActivity.viewFundraisingActivityDetails as jest.Mock).mockResolvedValue(mockActivity);
 
-      const result = await controller.getFundraisingActivityDetails('1');
+      const result = await controller.viewFundraisingActivityDetails('1');
 
       expect(result).toBe(mockActivity);
-      expect(FundraisingActivity.retrieveFundraisingActivityDetails).toHaveBeenCalledWith('1');
+      expect(FundraisingActivity.viewFundraisingActivityDetails).toHaveBeenCalledWith('1');
     });
 
     it('should return null when activity is not found', async () => {
-      (FundraisingActivity.retrieveFundraisingActivityDetails as jest.Mock).mockResolvedValue(null);
+      (FundraisingActivity.viewFundraisingActivityDetails as jest.Mock).mockResolvedValue(null);
 
-      const result = await controller.getFundraisingActivityDetails('999');
+      const result = await controller.viewFundraisingActivityDetails('999');
 
       expect(result).toBeNull();
     });

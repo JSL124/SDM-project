@@ -23,7 +23,7 @@ describe('FundraisingActivity - retrieve methods', () => {
     jest.clearAllMocks();
   });
 
-  describe('retrieveFundraisingActivities', () => {
+  describe('viewFundraisingActivities', () => {
     it('should return a list of FundraisingActivity objects', async () => {
       mockQuery.mockResolvedValue({
         rows: [mockRow],
@@ -33,7 +33,7 @@ describe('FundraisingActivity - retrieve methods', () => {
         fields: [],
       });
 
-      const activities = await FundraisingActivity.retrieveFundraisingActivities();
+      const activities = await FundraisingActivity.viewFundraisingActivities();
 
       expect(activities).toHaveLength(1);
       expect(activities[0]).toBeInstanceOf(FundraisingActivity);
@@ -51,13 +51,13 @@ describe('FundraisingActivity - retrieve methods', () => {
         fields: [],
       });
 
-      const activities = await FundraisingActivity.retrieveFundraisingActivities();
+      const activities = await FundraisingActivity.viewFundraisingActivities();
 
       expect(activities).toEqual([]);
     });
   });
 
-  describe('retrieveFundraisingActivityDetails', () => {
+  describe('viewFundraisingActivityDetails', () => {
     it('should return a FundraisingActivity when found', async () => {
       mockQuery.mockResolvedValue({
         rows: [mockRow],
@@ -67,7 +67,7 @@ describe('FundraisingActivity - retrieve methods', () => {
         fields: [],
       });
 
-      const activity = await FundraisingActivity.retrieveFundraisingActivityDetails('1');
+      const activity = await FundraisingActivity.viewFundraisingActivityDetails('1');
 
       expect(activity).toBeInstanceOf(FundraisingActivity);
       expect(activity?.getActivityID()).toBe('1');
@@ -87,7 +87,7 @@ describe('FundraisingActivity - retrieve methods', () => {
         fields: [],
       });
 
-      const activity = await FundraisingActivity.retrieveFundraisingActivityDetails('999');
+      const activity = await FundraisingActivity.viewFundraisingActivityDetails('999');
 
       expect(activity).toBeNull();
     });
