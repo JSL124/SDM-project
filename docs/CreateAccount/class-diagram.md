@@ -42,3 +42,4 @@ classDiagram
 - `CreateAccountController.createAccount(...)` returns a result object containing `success: boolean` and `message: string` so the route and boundary can distinguish duplicate username, missing profile, and generic save failures. The `success` field serves as the `boolean` return type specified in the diagram.
 - Return types in code are `Promise<T>` due to async DB operations. The underlying type still matches the diagram intent.
 - `displayError()` accepts a message parameter internally to show specific validation and backend error messages, while the diagram captures the public contract.
+- The create account submission flow remains unchanged. The profile dropdown is populated before submit through `UserProfile.listProfiles()` as a supporting read operation, then the selected `profileId` is passed into the existing create account flow.

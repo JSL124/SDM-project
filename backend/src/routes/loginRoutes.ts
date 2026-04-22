@@ -12,7 +12,10 @@ const loginHandler: RequestHandler = async (req, res) => {
       res.json({
         success: true,
         message: 'Login successful.',
-        user: account.getLoginUser(),
+        user: {
+          email: account.email,
+          role: account.role,
+        },
       });
       return;
     }

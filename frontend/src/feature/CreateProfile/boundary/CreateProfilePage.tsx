@@ -90,7 +90,7 @@ export default function CreateProfilePage() {
         }}
         onTransitionEnd={() => {
           if (!successVisible && isSuccess) {
-            router.push('/admin/manage-users');
+            router.push('/admin/create-account');
           }
         }}
       >
@@ -101,7 +101,7 @@ export default function CreateProfilePage() {
             </svg>
           </div>
           <p className="mt-6 text-2xl font-bold text-gray-900">{message}</p>
-          <p className="mt-2 text-sm text-gray-500">Redirecting to management page...</p>
+          <p className="mt-2 text-sm text-gray-500">Redirecting to account creation...</p>
         </div>
       </div>
     );

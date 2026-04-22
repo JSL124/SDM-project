@@ -1,18 +1,9 @@
 'use client';
 
-import { useState, useEffect, useSyncExternalStore } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getApiUrl } from '@/lib/api';
 import { hasRole } from '@/lib/auth';
-
-function subscribeToStorage(callback: () => void) {
-  window.addEventListener('storage', callback);
-  return () => window.removeEventListener('storage', callback);
-}
-
-function getIsAuthorized(): boolean {
-  return hasRole(localStorage.getItem('userRole'), 'Fundraiser');
-}
 
 type Activity = {
   activityID: string;
@@ -27,12 +18,8 @@ type Activity = {
 
 type ViewState = 'list' | 'detail';
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
 export default function ViewFundraisingActivitiesPage() {
-  const authorized = useSyncExternalStore(subscribeToStorage, getIsAuthorized, () => false);
+  const authorized = hasRole(typeof window === 'undefined' ? null : localStorage.getItem('userRole'), 'Fundraiser');
 
   const [viewState, setViewState] = useState<ViewState>('list');
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -41,58 +28,28 @@ export default function ViewFundraisingActivitiesPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void loadActivities();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function loadActivities(): Promise<void> {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(getApiUrl('/api/fundraising-activity'));
-      const data = (await response.json()) as { success: boolean; activities?: Activity[]; message?: string };
-      if (response.ok && data.success && data.activities) {
-        if (data.activities.length === 0) {
-          displayNoFundraisingActivitiesMessage();
-        } else {
+    void (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(getApiUrl('/api/fundraising-activity'));
+        const data = (await response.json()) as { success: boolean; activities?: Activity[]; message?: string };
+        if (response.ok && data.success && data.activities) {
           displayFundraisingActivities(data.activities);
+        } else {
+          setError(data.message ?? 'Failed to load activities.');
         }
-      } else {
-        setError(data.message ?? 'Failed to load activities.');
+      } catch {
+        setError('Unable to connect to server.');
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      setError('Unable to connect to server.');
-    } finally {
-      setLoading(false);
-    }
-  }
+    })();
+  }, []);
 
   function displayFundraisingActivities(list: Activity[]): void {
     setActivities(list);
     setViewState('list');
-  }
-
-  function displayNoFundraisingActivitiesMessage(): void {
-    setActivities([]);
-  }
-
-  async function selectFundraisingActivity(activityID: string): Promise<void> {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(getApiUrl(`/api/fundraising-activity/${activityID}`));
-      const data = (await response.json()) as { success: boolean; activity?: Activity; message?: string };
-      if (response.ok && data.success && data.activity) {
-        setSelectedActivity(data.activity);
-        displayFundraisingActivityDetails();
-      } else {
-        setError(data.message ?? 'Failed to load activity details.');
-      }
-    } catch {
-      setError('Unable to connect to server.');
-    } finally {
-      setLoading(false);
-    }
   }
 
   function displayFundraisingActivityDetails(): void {
@@ -147,7 +104,26 @@ export default function ViewFundraisingActivitiesPage() {
                 {activities.map((activity) => (
                   <button
                     key={activity.activityID}
-                    onClick={() => void selectFundraisingActivity(activity.activityID)}
+                    onClick={() => {
+                      void (async () => {
+                        setLoading(true);
+                        setError(null);
+                        try {
+                          const response = await fetch(getApiUrl(`/api/fundraising-activity/${activity.activityID}`));
+                          const data = (await response.json()) as { success: boolean; activity?: Activity; message?: string };
+                          if (response.ok && data.success && data.activity) {
+                            setSelectedActivity(data.activity);
+                            displayFundraisingActivityDetails();
+                          } else {
+                            setError(data.message ?? 'Failed to load activity details.');
+                          }
+                        } catch {
+                          setError('Unable to connect to server.');
+                        } finally {
+                          setLoading(false);
+                        }
+                      })();
+                    }}
                     className="rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm transition-shadow hover:shadow-md"
                   >
                     <div className="mb-2 flex items-start justify-between gap-2">
@@ -159,7 +135,8 @@ export default function ViewFundraisingActivitiesPage() {
                     <p className="mb-3 text-sm text-gray-500 line-clamp-2">{activity.description}</p>
                     <p className="text-lg font-bold text-gray-900">${Number(activity.targetAmount).toLocaleString()}</p>
                     <p className="mt-1 text-xs text-gray-400">
-                      {formatDate(activity.startDate)} — {formatDate(activity.endDate)}
+                      {new Date(activity.startDate).toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' })} —{' '}
+                      {new Date(activity.endDate).toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </p>
                   </button>
                 ))}
@@ -209,11 +186,23 @@ export default function ViewFundraisingActivitiesPage() {
                   </div>
                   <div>
                     <dt className="font-medium text-gray-500">Start Date</dt>
-                    <dd className="mt-1 text-gray-900">{formatDate(selectedActivity.startDate)}</dd>
+                    <dd className="mt-1 text-gray-900">
+                      {new Date(selectedActivity.startDate).toLocaleDateString('en-AU', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </dd>
                   </div>
                   <div>
                     <dt className="font-medium text-gray-500">End Date</dt>
-                    <dd className="mt-1 text-gray-900">{formatDate(selectedActivity.endDate)}</dd>
+                    <dd className="mt-1 text-gray-900">
+                      {new Date(selectedActivity.endDate).toLocaleDateString('en-AU', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </dd>
                   </div>
                 </dl>
               </div>

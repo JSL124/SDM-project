@@ -81,7 +81,7 @@ export default function CreateFundraisingActivityPage() {
 
   function handleSuccessExit() {
     if (!successVisible && isSuccess) {
-      router.push('/fundraiser/manage-activities');
+      router.push('/fundraiser/view-fundraising-activity');
     }
   }
 
@@ -185,7 +185,7 @@ export default function CreateFundraisingActivityPage() {
   function closeFundraisingActivityForm(): void {
     setVisible(false);
     window.setTimeout(() => {
-      router.push('/fundraiser/manage-activities');
+      router.push('/fundraiser/view-fundraising-activity');
     }, EXIT_ANIMATION_MS);
   }
 

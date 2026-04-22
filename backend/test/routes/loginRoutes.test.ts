@@ -43,11 +43,8 @@ describe('loginRoutes', () => {
 
   it('returns 200 for successful login', async () => {
     const handler = await loadHandler({
-      getLoginUser: () => ({
-        email: 'active.fundraiser@example.com',
-        username: 'active-user',
-        role: 'User admin',
-      }),
+      email: 'active.fundraiser@example.com',
+      role: 'User admin',
     } as unknown);
     const response = createResponse();
 
@@ -67,7 +64,6 @@ describe('loginRoutes', () => {
       message: 'Login successful.',
       user: {
         email: 'active.fundraiser@example.com',
-        username: 'active-user',
         role: 'User admin',
       },
     });

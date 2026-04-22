@@ -27,9 +27,23 @@ describe('UserAccount - Create Account methods', () => {
       expect(account).not.toBeNull();
       expect(account).toBeInstanceOf(UserAccount);
       expect(mockQuery).toHaveBeenCalledWith(
-        'INSERT INTO user_account (email, password, name, dob, phone_num, profile_id) VALUES ($1, $2, $3, $4, $5, $6)',
-        ['new.user@example.com', 'Password123!', 'New User', '1998-01-01', '0498765432', '1']
+        expect.stringContaining('INSERT INTO user_account (email, password, profile_id, role)'),
+        ['new.user@example.com', 'Password123!', '1']
       );
+    });
+
+    it('should return null when profile does not exist', async () => {
+      mockQuery.mockResolvedValue({
+        rows: [],
+        command: 'INSERT',
+        rowCount: 0,
+        oid: 0,
+        fields: [],
+      });
+
+      const account = await UserAccount.createAccount('new.user@example.com', 'Password123!', 'New User', '1998-01-01', '0498765432', '999');
+
+      expect(account).toBeNull();
     });
 
     it('should return null when account already exists', async () => {

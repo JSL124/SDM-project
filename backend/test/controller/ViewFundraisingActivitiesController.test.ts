@@ -1,7 +1,7 @@
-import { ViewFundraisingActivitiesController } from '../../src/fundraising/controller/ViewFundraisingActivitiesController';
-import { FundraisingActivity } from '../../src/fundraising/entity/FundraisingActivity';
+import { ViewFundraisingActivitiesController } from '../../src/ViewFundraisingActivity/controller/ViewFundraisingActivitiesController';
+import { FundraisingActivity } from '../../src/shared/entity/FundraisingActivity';
 
-jest.mock('../../src/fundraising/entity/FundraisingActivity');
+jest.mock('../../src/shared/entity/FundraisingActivity');
 
 describe('ViewFundraisingActivitiesController', () => {
   let controller: ViewFundraisingActivitiesController;

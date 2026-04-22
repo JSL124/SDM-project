@@ -1,4 +1,4 @@
-import { FundraisingActivity } from '../entity/FundraisingActivity';
+import { FundraisingActivity } from '../../shared/entity/FundraisingActivity';
 
 export class ViewFundraisingActivitiesController {
   async viewFundraisingActivities(): Promise<FundraisingActivity[]> {

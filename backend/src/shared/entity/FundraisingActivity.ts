@@ -1,66 +1,16 @@
 import { query } from '../../db';
 
 export class FundraisingActivity {
-  private activityID: string;
-  private title: string;
-  private description: string;
-  private targetAmount: number;
-  private category: string;
-  private startDate: string;
-  private endDate: string;
-  private status: string;
-
   constructor(
-    activityID: string,
-    title: string,
-    description: string,
-    targetAmount: number,
-    category: string,
-    startDate: string,
-    endDate: string,
-    status: string,
-  ) {
-    this.activityID = activityID;
-    this.title = title;
-    this.description = description;
-    this.targetAmount = targetAmount;
-    this.category = category;
-    this.startDate = startDate;
-    this.endDate = endDate;
-    this.status = status;
-  }
-
-  getActivityID(): string {
-    return this.activityID;
-  }
-
-  getTitle(): string {
-    return this.title;
-  }
-
-  getDescription(): string {
-    return this.description;
-  }
-
-  getTargetAmount(): number {
-    return this.targetAmount;
-  }
-
-  getCategory(): string {
-    return this.category;
-  }
-
-  getStartDate(): string {
-    return this.startDate;
-  }
-
-  getEndDate(): string {
-    return this.endDate;
-  }
-
-  getStatus(): string {
-    return this.status;
-  }
+    public readonly activityID: string,
+    public readonly title: string,
+    public readonly description: string,
+    public readonly targetAmount: number,
+    public readonly category: string,
+    public readonly startDate: string,
+    public readonly endDate: string,
+    public readonly status: string,
+  ) {}
 
   static async viewFundraisingActivities(): Promise<FundraisingActivity[]> {
     const sql =

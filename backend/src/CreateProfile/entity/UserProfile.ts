@@ -1,5 +1,11 @@
 import { query } from '../../db';
 
+export type ProfileListItem = {
+  profileId: string;
+  role: string;
+  description: string;
+};
+
 export class UserProfile {
   constructor(public role: string, public description: string) {}
 
@@ -11,5 +17,15 @@ export class UserProfile {
     } catch {
       return null;
     }
+  }
+
+  static async listProfiles(): Promise<ProfileListItem[]> {
+    const sql = 'SELECT profile_id, role, description FROM user_profile ORDER BY profile_id ASC';
+    const result = await query(sql);
+    return result.rows.map((row) => ({
+      profileId: String(row.profile_id),
+      role: row.role,
+      description: row.description ?? '',
+    }));
   }
 }

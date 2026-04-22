@@ -46,3 +46,4 @@ classDiagram
 - Entity: `UserAccount` handles username lookup and account persistence, while `UserProfile` provides profile lookup by ID.
 - Database: PostgreSQL `user_account` and `user_profile` tables used by the entity layer.
 - Boundary rule: No success or error message is displayed before the user admin submits the create account form.
+- Supporting read: The boundary loads existing profiles into a dropdown before submit through a profile list API backed by `UserProfile.listProfiles()`. This does not change the create account submission BCE flow, which still passes the selected `profileId`.

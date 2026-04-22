@@ -1,4 +1,4 @@
-import { FundraisingActivity } from '../../src/fundraising/entity/FundraisingActivity';
+import { FundraisingActivity } from '../../src/shared/entity/FundraisingActivity';
 
 jest.mock('../../src/db', () => ({
   query: jest.fn(),
@@ -37,9 +37,9 @@ describe('FundraisingActivity - retrieve methods', () => {
 
       expect(activities).toHaveLength(1);
       expect(activities[0]).toBeInstanceOf(FundraisingActivity);
-      expect(activities[0].getActivityID()).toBe('1');
-      expect(activities[0].getTitle()).toBe('Help the Community');
-      expect(activities[0].getTargetAmount()).toBe(5000);
+      expect(activities[0].activityID).toBe('1');
+      expect(activities[0].title).toBe('Help the Community');
+      expect(activities[0].targetAmount).toBe(5000);
     });
 
     it('should return an empty array when there are no activities', async () => {
@@ -70,8 +70,8 @@ describe('FundraisingActivity - retrieve methods', () => {
       const activity = await FundraisingActivity.viewFundraisingActivityDetails('1');
 
       expect(activity).toBeInstanceOf(FundraisingActivity);
-      expect(activity?.getActivityID()).toBe('1');
-      expect(activity?.getTitle()).toBe('Help the Community');
+      expect(activity?.activityID).toBe('1');
+      expect(activity?.title).toBe('Help the Community');
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('WHERE activity_id = $1'),
         ['1'],

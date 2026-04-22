@@ -16,13 +16,11 @@ import { hasRole } from '@/lib/auth';
 
 type LoggedInUser = {
   email: string;
-  username?: string;
   role?: string;
 };
 
 function getStoredLoggedInUser(): LoggedInUser | null {
   const email = localStorage.getItem('userEmail')?.trim() ?? '';
-  const username = localStorage.getItem('userUsername')?.trim() ?? '';
   const role = localStorage.getItem('userRole')?.trim() ?? '';
 
   if (!email) {
@@ -31,7 +29,6 @@ function getStoredLoggedInUser(): LoggedInUser | null {
 
   return {
     email,
-    username: username || undefined,
     role: role || undefined,
   };
 }
@@ -119,7 +116,7 @@ export default function Navbar() {
     return () => window.removeEventListener('storage', syncLoggedInUser);
   }, []);
 
-  const displayName = loggedInUser?.username?.trim() || loggedInUser?.email.split('@')[0]?.trim() || '';
+  const displayName = loggedInUser?.email.split('@')[0]?.trim() || '';
   const avatarLetter = (displayName[0] ?? loggedInUser?.email[0] ?? '?').toUpperCase();
 
   function handleLoginSuccess(user: LoggedInUser): void {
@@ -129,7 +126,7 @@ export default function Navbar() {
     showFlashBanner(loginSuccessMessage, LOGIN_SUCCESS_BANNER_MS, 'success');
     if (hasRole(user.role, 'User admin')) {
       queueFlashBanner({ message: loginSuccessMessage, durationMs: LOGIN_SUCCESS_BANNER_MS, variant: 'success' });
-      router.push('/admin/manage-users?tab=account');
+      router.push('/admin/create-account');
     } else if (hasRole(user.role, 'Platform manager')) {
       queueFlashBanner({ message: loginSuccessMessage, durationMs: LOGIN_SUCCESS_BANNER_MS, variant: 'success' });
       router.push('/admin/platform-management');
@@ -157,7 +154,7 @@ export default function Navbar() {
           {/* Desktop nav links */}
           {loggedInUser ? (
             <div className="hidden items-center gap-14 md:flex">
-              <Link href="/fundraiser/manage-activities" className="flex items-center gap-1 text-[15px] font-medium text-gray-600 hover:text-gray-900">
+              <Link href="/fundraiser/view-fundraising-activity" className="flex items-center gap-1 text-[15px] font-medium text-gray-600 hover:text-gray-900">
                 <span>Fundraising Activities</span>
               </Link>
             </div>
@@ -266,7 +263,7 @@ export default function Navbar() {
           <div className="border-t border-gray-100 px-6 pb-4 md:hidden">
             <div className="flex flex-col gap-3 pt-3">
               <Link
-                href="/fundraiser/manage-activities"
+                href="/fundraiser/view-fundraising-activity"
                 className="flex items-center gap-1 text-left text-sm font-medium text-gray-600"
                 onClick={() => setMenuOpen(false)}
               >

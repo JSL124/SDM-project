@@ -13,11 +13,8 @@ describe('LoginController', () => {
 
   it('should return UserAccount when UserAccount.login returns an account', async () => {
     const account = {
-      getLoginUser: () => ({
-        email: 'active.fundraiser@example.com',
-        username: 'active-user',
-        role: 'User admin',
-      }),
+      email: 'active.fundraiser@example.com',
+      role: 'User admin',
     } as unknown as UserAccount;
     (UserAccount.login as jest.Mock).mockResolvedValue(account);
 

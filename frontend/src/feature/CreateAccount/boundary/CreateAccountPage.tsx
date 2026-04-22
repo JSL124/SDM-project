@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getApiUrl } from '@/lib/api';
 
 type AccountResult = {
@@ -11,6 +11,12 @@ type AccountResult = {
 type AccountStatus = {
   submitted: boolean;
   result: AccountResult | null;
+};
+
+type ProfileOption = {
+  profileId: string;
+  role: string;
+  description: string;
 };
 
 const initialStatus: AccountStatus = {
@@ -25,9 +31,45 @@ export default function CreateAccountPage() {
   const [DOB, setDOB] = useState('');
   const [phoneNum, setPhoneNum] = useState('');
   const [profileId, setProfileId] = useState('');
+  const [profiles, setProfiles] = useState<ProfileOption[]>([]);
+  const [profilesLoading, setProfilesLoading] = useState(true);
+  const [profilesError, setProfilesError] = useState('');
   const [status, setStatus] = useState<AccountStatus>(initialStatus);
 
   const isSuccess = status.result?.success;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadProfiles() {
+      try {
+        const response = await fetch(getApiUrl('/api/profile'));
+        if (!response.ok) {
+          throw new Error('Unable to load profiles');
+        }
+
+        const data = (await response.json()) as ProfileOption[];
+        if (isMounted) {
+          setProfiles(data);
+          setProfilesError('');
+        }
+      } catch {
+        if (isMounted) {
+          setProfilesError('Unable to load profiles.');
+        }
+      } finally {
+        if (isMounted) {
+          setProfilesLoading(false);
+        }
+      }
+    }
+
+    void loadProfiles();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   function displaySuccess(): void {
     setStatus({
@@ -170,16 +212,27 @@ export default function CreateAccountPage() {
 
         <div>
           <label htmlFor="profileId" className="mb-1.5 block text-sm font-medium text-gray-700">
-            Profile ID
+            Profile
           </label>
-          <input
+          <select
             id="profileId"
-            type="text"
             value={profileId}
             onChange={(event) => setProfileId(event.target.value)}
-            placeholder="Enter profile ID"
+            disabled={profilesLoading}
             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-          />
+          >
+            <option value="">
+              {profilesLoading ? 'Loading profiles...' : 'Select profile'}
+            </option>
+            {profiles.map((profile) => (
+              <option key={profile.profileId} value={profile.profileId}>
+                {profile.role}
+              </option>
+            ))}
+          </select>
+          {profilesError ? (
+            <p className="mt-2 text-sm text-red-600">{profilesError}</p>
+          ) : null}
         </div>
 
         {message ? (

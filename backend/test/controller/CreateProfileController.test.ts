@@ -28,4 +28,17 @@ describe('CreateProfileController', () => {
 
     expect(result).toBeNull();
   });
+
+  it('should return profiles when listing profiles succeeds', async () => {
+    const profiles = [
+      { profileId: '1', role: 'Donee', description: 'Receives donations' },
+      { profileId: '2', role: 'Fundraiser', description: 'Creates fundraising activities' },
+    ];
+    (UserProfile.listProfiles as jest.Mock).mockResolvedValue(profiles);
+
+    const result = await controller.listProfiles();
+
+    expect(result).toBe(profiles);
+    expect(UserProfile.listProfiles).toHaveBeenCalled();
+  });
 });

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateProfilePage from './CreateProfilePage';
 import { getApiUrl } from '@/lib/api';
@@ -103,6 +103,31 @@ describe('CreateProfilePage', () => {
     });
 
     expect(await screen.findByText('Profile created successfully.')).toBeInTheDocument();
+  });
+
+  it('redirects to create account after profile creation success animation ends', async () => {
+    const requestAnimationFrameSpy = jest
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation(() => 0);
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        role: 'Fundraiser',
+        description: 'Creates fundraising activities',
+      }),
+    });
+
+    render(<CreateProfilePage />);
+
+    await user.type(screen.getByLabelText('Role'), 'Fundraiser');
+    await user.type(screen.getByLabelText('Description'), 'Creates fundraising activities');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    fireEvent.transitionEnd(await screen.findByText('Profile created successfully.'));
+
+    expect(mockPush).toHaveBeenCalledWith('/admin/create-account');
+    requestAnimationFrameSpy.mockRestore();
   });
 
   it('shows an error when profile creation returns null', async () => {

@@ -4,18 +4,71 @@ import CreateAccountPage from './CreateAccountPage';
 import { getApiUrl } from '@/lib/api';
 
 type MockAccountResponse = {
+  success: boolean;
+  message: string;
+};
+
+type MockProfileResponse = {
+  profileId: string;
+  role: string;
+  description: string;
+};
+
+type MockFetchResponse = {
   ok: boolean;
-  json: () => Promise<{ success: boolean; message: string }>;
+  json: () => Promise<MockAccountResponse | MockProfileResponse[]>;
 };
 
 describe('CreateAccountPage', () => {
-  const fetchMock = jest.fn<Promise<MockAccountResponse>, [RequestInfo | URL, RequestInit?]>();
+  const profiles: MockProfileResponse[] = [
+    { profileId: '1', role: 'Donee', description: 'Receives donations' },
+    { profileId: '2', role: 'Fundraiser', description: 'Creates fundraising activities' },
+    { profileId: '3', role: 'User admin', description: 'Manages user accounts' },
+    { profileId: '4', role: 'Platform manager', description: 'Manages platform operations' },
+  ];
+  const fetchMock = jest.fn<Promise<MockFetchResponse>, [RequestInfo | URL, RequestInit?]>();
 
   beforeEach(() => {
     fetchMock.mockReset();
+    mockFetchResponses();
     global.fetch = fetchMock as unknown as typeof fetch;
     localStorage.clear();
   });
+
+  function mockFetchResponses({
+    profileOk = true,
+    profileResponse = profiles,
+    accountOk = true,
+    accountResponse = {
+      success: true,
+      message: 'Account created successfully.',
+    },
+    rejectAccount = false,
+  }: {
+    profileOk?: boolean;
+    profileResponse?: MockProfileResponse[];
+    accountOk?: boolean;
+    accountResponse?: MockAccountResponse;
+    rejectAccount?: boolean;
+  } = {}) {
+    fetchMock.mockImplementation(async (input) => {
+      if (String(input) === getApiUrl('/api/profile')) {
+        return {
+          ok: profileOk,
+          json: async () => profileResponse,
+        };
+      }
+
+      if (rejectAccount) {
+        throw new Error('Network failure');
+      }
+
+      return {
+        ok: accountOk,
+        json: async () => accountResponse,
+      };
+    });
+  }
 
   async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
     await user.type(screen.getByLabelText('Email'), 'new.user@example.com');
@@ -23,19 +76,24 @@ describe('CreateAccountPage', () => {
     await user.type(screen.getByLabelText('Name'), 'New User');
     await user.type(screen.getByLabelText('DOB'), '1998-01-01');
     await user.type(screen.getByLabelText('Phone Number'), '0498765432');
-    await user.type(screen.getByLabelText('Profile ID'), '1');
+    await screen.findByRole('option', { name: 'Donee' });
+    await user.selectOptions(screen.getByLabelText('Profile'), '1');
   }
 
-  it('shows no status message before submit', () => {
+  it('shows no status message before submit', async () => {
     render(<CreateAccountPage />);
+
+    await screen.findByRole('option', { name: 'Donee' });
 
     expect(screen.queryByText('Please enter an email.')).not.toBeInTheDocument();
     expect(screen.queryByText('User Account exists.')).not.toBeInTheDocument();
     expect(screen.queryByText('Account Created')).not.toBeInTheDocument();
   });
 
-  it('shows the create account form', () => {
+  it('shows the create account form', async () => {
     render(<CreateAccountPage />);
+
+    await screen.findByRole('option', { name: 'Donee' });
 
     expect(screen.getByText('Create User Account')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
@@ -43,17 +101,17 @@ describe('CreateAccountPage', () => {
     expect(screen.getByLabelText('Name')).toBeInTheDocument();
     expect(screen.getByLabelText('DOB')).toBeInTheDocument();
     expect(screen.getByLabelText('Phone Number')).toBeInTheDocument();
-    expect(screen.getByLabelText('Profile ID')).toBeInTheDocument();
+    expect(screen.getByLabelText('Profile')).toBeInTheDocument();
   });
 
   it('sends the entered payload without client-side validation', async () => {
     const user = userEvent.setup();
-    fetchMock.mockResolvedValue({
-      ok: false,
-      json: async () => ({
+    mockFetchResponses({
+      accountOk: false,
+      accountResponse: {
         success: false,
         message: 'User Account exists.',
-      }),
+      },
     });
     render(<CreateAccountPage />);
 
@@ -76,14 +134,38 @@ describe('CreateAccountPage', () => {
     });
   });
 
+  it('loads profile options for the dropdown', async () => {
+    render(<CreateAccountPage />);
+
+    expect(fetchMock).toHaveBeenCalledWith(getApiUrl('/api/profile'));
+    expect(await screen.findByRole('option', { name: 'Donee' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Fundraiser' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'User admin' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Platform manager' })).toBeInTheDocument();
+  });
+
+  it('shows a loading profile placeholder while profiles load', () => {
+    fetchMock.mockImplementation(
+      () =>
+        new Promise<MockFetchResponse>(() => {
+          // Keep the request pending so the loading state remains visible.
+        })
+    );
+
+    render(<CreateAccountPage />);
+
+    expect(screen.getByRole('option', { name: 'Loading profiles...' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Profile')).toBeDisabled();
+  });
+
   it('shows success message on successful account creation', async () => {
     const user = userEvent.setup();
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => ({
+    mockFetchResponses({
+      accountOk: true,
+      accountResponse: {
         success: true,
         message: 'Account created successfully.',
-      }),
+      },
     });
 
     render(<CreateAccountPage />);
@@ -111,12 +193,12 @@ describe('CreateAccountPage', () => {
 
   it('shows error message when user account exists', async () => {
     const user = userEvent.setup();
-    fetchMock.mockResolvedValue({
-      ok: false,
-      json: async () => ({
+    mockFetchResponses({
+      accountOk: false,
+      accountResponse: {
         success: false,
         message: 'User Account exists.',
-      }),
+      },
     });
 
     render(<CreateAccountPage />);
@@ -129,7 +211,7 @@ describe('CreateAccountPage', () => {
 
   it('shows network error when server is unavailable', async () => {
     const user = userEvent.setup();
-    fetchMock.mockRejectedValue(new Error('Network failure'));
+    mockFetchResponses({ rejectAccount: true });
 
     render(<CreateAccountPage />);
 
@@ -137,5 +219,14 @@ describe('CreateAccountPage', () => {
     await user.click(screen.getByRole('button', { name: 'Create' }));
 
     expect(await screen.findByText('Unable to connect to server.')).toBeInTheDocument();
+  });
+
+  it('shows profile loading error when profiles cannot be loaded', async () => {
+    mockFetchResponses({ profileOk: false });
+
+    render(<CreateAccountPage />);
+
+    expect(await screen.findByText('Unable to load profiles.')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Select profile' })).toBeInTheDocument();
   });
 });

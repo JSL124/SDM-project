@@ -40,13 +40,13 @@ describe('fundraisingRoutes', () => {
       : jest.fn().mockResolvedValue(getDetailResult);
 
     jest.doMock('../../src/db', () => ({ query: jest.fn() }));
-    jest.doMock('../../src/fundraising/controller/CreateFundraisingActivityController', () => ({
+    jest.doMock('../../src/CreateFundraisingActivity/controller/CreateFundraisingActivityController', () => ({
       CreateFundraisingActivityController: jest.fn().mockImplementation(() => ({
         createFundraisingActivity: createFundraisingActivityMock,
       })),
     }));
 
-    jest.doMock('../../src/fundraising/controller/ViewFundraisingActivitiesController', () => ({
+    jest.doMock('../../src/ViewFundraisingActivity/controller/ViewFundraisingActivitiesController', () => ({
       ViewFundraisingActivitiesController: jest.fn().mockImplementation(() => ({
         viewFundraisingActivities: getFundraisingActivitiesMock,
         viewFundraisingActivityDetails: getFundraisingActivityDetailsMock,

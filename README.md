@@ -28,7 +28,6 @@ The frontend and backend are separate applications. Next.js is used only for the
 - Logout
 - Create user profile
 - Create user account
-- Manage users UI
 
 Feature-specific design and implementation rules are documented under `docs/<feature>/`.
 
@@ -85,7 +84,7 @@ Apply them in order:
 
 1. `001-create-tables.sql`
 2. `002-seed-test-data.sql`
-3. `003-add-account-username-profile-role.sql`
+3. `003-add-account-profile-role.sql`
 
 ## Installation
 

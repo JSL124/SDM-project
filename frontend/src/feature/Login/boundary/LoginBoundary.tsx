@@ -8,7 +8,6 @@ type LoginBoundaryResult = {
   message: string;
   user?: {
     email: string;
-    username?: string;
     role?: string;
   };
 };
@@ -24,7 +23,7 @@ const initialStatus: LoginStatus = {
 };
 
 interface LoginBoundaryProps {
-  onLoginSuccess?: (user: { email: string; username?: string; role?: string }) => void;
+  onLoginSuccess?: (user: { email: string; role?: string }) => void;
 }
 
 export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
@@ -62,7 +61,7 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
     });
   }
 
-  function displaySuccess(user: { email: string; username?: string; role?: string }): void {
+  function displaySuccess(user: { email: string; role?: string }): void {
     setStatus({
       submitted: true,
       result: {
@@ -94,11 +93,9 @@ export default function LoginBoundary({ onLoginSuccess }: LoginBoundaryProps) {
       if (response.ok && data.success) {
         const loggedInUser = {
           email: data.user?.email ?? email,
-          username: data.user?.username ?? '',
           role: data.user?.role ?? '',
         };
         localStorage.setItem('userEmail', loggedInUser.email);
-        localStorage.setItem('userUsername', loggedInUser.username);
         localStorage.setItem('userRole', loggedInUser.role);
         displaySuccess(loggedInUser);
         return;

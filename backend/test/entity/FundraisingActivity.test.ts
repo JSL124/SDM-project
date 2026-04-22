@@ -1,4 +1,4 @@
-import { FundraisingActivity } from '../../src/fundraising/entity/FundraisingActivity';
+import { FundraisingActivity } from '../../src/shared/entity/FundraisingActivity';
 
 jest.mock('../../src/db', () => ({
   query: jest.fn(),
@@ -12,7 +12,7 @@ describe('FundraisingActivity', () => {
     jest.clearAllMocks();
   });
 
-  describe('constructor and getters', () => {
+  describe('constructor', () => {
     it('should store all activity fields', () => {
       const activity = new FundraisingActivity(
         '1',
@@ -25,14 +25,14 @@ describe('FundraisingActivity', () => {
         'ACTIVE',
       );
 
-      expect(activity.getActivityID()).toBe('1');
-      expect(activity.getTitle()).toBe('Help the Community');
-      expect(activity.getDescription()).toBe('A fundraiser to support local shelters.');
-      expect(activity.getTargetAmount()).toBe(5000);
-      expect(activity.getCategory()).toBe('Community');
-      expect(activity.getStartDate()).toBe('2026-05-01');
-      expect(activity.getEndDate()).toBe('2026-06-01');
-      expect(activity.getStatus()).toBe('ACTIVE');
+      expect(activity.activityID).toBe('1');
+      expect(activity.title).toBe('Help the Community');
+      expect(activity.description).toBe('A fundraiser to support local shelters.');
+      expect(activity.targetAmount).toBe(5000);
+      expect(activity.category).toBe('Community');
+      expect(activity.startDate).toBe('2026-05-01');
+      expect(activity.endDate).toBe('2026-06-01');
+      expect(activity.status).toBe('ACTIVE');
     });
   });
 

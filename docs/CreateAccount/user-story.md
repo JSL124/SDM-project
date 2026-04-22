@@ -15,9 +15,9 @@ As a user admin, I want to create a new user account linked to an existing profi
 - Ensures each account is linked to an existing user profile.
 
 ## Acceptance Criteria
-1. The system shall allow a user admin to enter a profile ID, username, password, and role on the create account page.
+1. The system shall allow a user admin to select an existing profile from a dropdown and enter username, password, and role on the create account page.
 2. The system shall allow only users with role `User admin` to access the create account form.
-3. The boundary shall validate that profile ID, username, password, and role are provided before sending the request.
+3. The boundary shall validate that a profile, username, password, and role are provided before sending the request.
 4. The system shall check whether the username already exists before saving the account.
 5. The system shall verify that the referenced profile exists.
 6. The system shall create the account when the input is valid, the username is unique, and the profile exists.

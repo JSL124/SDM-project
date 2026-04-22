@@ -10,7 +10,6 @@ type MockLoginResponse = {
     message: string;
     user?: {
       email: string;
-      username?: string;
       role?: string;
     };
   }>;
@@ -113,7 +112,6 @@ describe('LoginBoundary', () => {
         message: 'Login successful.',
         user: {
           email: 'active.fundraiser@example.com',
-          username: 'active-user',
           role: 'User admin',
         },
       }),
@@ -141,7 +139,6 @@ describe('LoginBoundary', () => {
       expect(screen.queryByText('Redirecting to dashboard...')).not.toBeInTheDocument();
     });
     expect(localStorage.getItem('userEmail')).toBe('active.fundraiser@example.com');
-    expect(localStorage.getItem('userUsername')).toBe('active-user');
     expect(localStorage.getItem('userRole')).toBe('User admin');
   });
 
@@ -155,7 +152,6 @@ describe('LoginBoundary', () => {
         message: 'Login successful.',
         user: {
           email: 'jason21888@naver.com',
-          username: 'jason04',
           role: 'User admin',
         },
       }),
@@ -170,7 +166,6 @@ describe('LoginBoundary', () => {
     await waitFor(() => {
       expect(onLoginSuccess).toHaveBeenCalledWith({
         email: 'jason21888@naver.com',
-        username: 'jason04',
         role: 'User admin',
       });
     });

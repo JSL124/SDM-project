@@ -6,7 +6,7 @@ import LoginBoundary from '@/feature/Login/boundary/LoginBoundary';
 interface LoginModalProps {
   open: boolean;
   onClose: () => void;
-  onLoginSuccess: (user: { email: string; username?: string; role?: string }) => void;
+  onLoginSuccess: (user: { email: string; role?: string }) => void;
 }
 
 const ENTER_ANIMATION_DELAY_MS = 20;

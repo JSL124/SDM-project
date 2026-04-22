@@ -16,7 +16,7 @@ jest.mock('@/components/ui/LoginModal', () => ({
     onLoginSuccess,
   }: {
     open: boolean;
-    onLoginSuccess: (user: { email: string; username?: string; role?: string }) => void;
+    onLoginSuccess: (user: { email: string; role?: string }) => void;
   }) {
     if (!open) {
       return null;
@@ -24,10 +24,10 @@ jest.mock('@/components/ui/LoginModal', () => ({
 
     return (
       <>
-        <button onClick={() => onLoginSuccess({ email: 'jason21888@naver.com', username: 'jason04', role: 'User admin' })}>
+        <button onClick={() => onLoginSuccess({ email: 'jason21888@naver.com', role: 'User admin' })}>
           Complete Mock Admin Login
         </button>
-        <button onClick={() => onLoginSuccess({ email: 'jason21888@naver.com', username: 'jason04', role: 'Fundraiser' })}>
+        <button onClick={() => onLoginSuccess({ email: 'jason21888@naver.com', role: 'Fundraiser' })}>
           Complete Mock User Login
         </button>
       </>
@@ -65,7 +65,6 @@ const logoutMock = logout as jest.MockedFunction<typeof logout>;
 function setStoredUser(role: 'User admin' | 'Fundraiser' = 'Fundraiser') {
   localStorage.setItem('userRole', role);
   localStorage.setItem('userEmail', 'jason21888@naver.com');
-  localStorage.setItem('userUsername', 'jason04');
 }
 
 describe('Navbar', () => {
@@ -82,7 +81,7 @@ describe('Navbar', () => {
     await user.click(screen.getByRole('button', { name: 'Sign In' }));
     await user.click(screen.getByRole('button', { name: role === 'User admin' ? 'Complete Mock Admin Login' : 'Complete Mock User Login' }));
 
-    expect(await screen.findByRole('button', { name: 'Open profile menu for jason04' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Open profile menu for jason21888' })).toBeInTheDocument();
     return user;
   }
 
@@ -100,8 +99,8 @@ describe('Navbar', () => {
     setStoredUser();
     render(<Navbar />);
 
-    expect(screen.getByRole('link', { name: 'Fundraising Activities' })).toHaveAttribute('href', '/fundraiser/manage-activities');
-    expect(screen.getByRole('button', { name: 'Open profile menu for jason04' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Fundraising Activities' })).toHaveAttribute('href', '/fundraiser/view-fundraising-activity');
+    expect(screen.getByRole('button', { name: 'Open profile menu for jason21888' })).toBeInTheDocument();
   });
 
   it('shows only Sign out in the desktop profile menu', async () => {
@@ -109,7 +108,7 @@ describe('Navbar', () => {
     const user = userEvent.setup();
     render(<Navbar />);
 
-    const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
+    const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason21888' });
     await user.hover(profileTrigger);
 
     expect(screen.getByRole('menu', { name: 'Profile menu' })).toBeInTheDocument();
@@ -128,7 +127,7 @@ describe('Navbar', () => {
 
     await user.click(screen.getByRole('button', { name: 'Toggle menu' }));
 
-    expect(screen.getAllByText('jason04')).toHaveLength(2);
+    expect(screen.getAllByText('jason21888')).toHaveLength(2);
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
   });
 
@@ -137,7 +136,7 @@ describe('Navbar', () => {
     const user = userEvent.setup();
     render(<Navbar />);
 
-    await user.hover(screen.getByRole('button', { name: 'Open profile menu for jason04' }));
+    await user.hover(screen.getByRole('button', { name: 'Open profile menu for jason21888' }));
 
     expect(screen.queryByRole('menuitem', { name: 'Admin' })).not.toBeInTheDocument();
   });
@@ -147,7 +146,7 @@ describe('Navbar', () => {
     setStoredUser();
     render(<Navbar />);
 
-    const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason04' });
+    const profileTrigger = screen.getByRole('button', { name: 'Open profile menu for jason21888' });
     fireEvent.focus(profileTrigger);
     fireEvent.mouseDown(screen.getByRole('menuitem', { name: 'Sign out' }));
 
@@ -166,13 +165,13 @@ describe('Navbar', () => {
   it('allows login through the sign in button', async () => {
     await logInThroughNavbar('Fundraiser');
 
-    expect(screen.getByRole('button', { name: 'Open profile menu for jason04' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open profile menu for jason21888' })).toBeInTheDocument();
     expect(screen.getByText('You have successfully signed in to FundRaise.')).toBeInTheDocument();
   });
 
-  it('redirects user admins to the account management tab after login', async () => {
+  it('redirects user admins to the create account page after login', async () => {
     await logInThroughNavbar('User admin');
 
-    expect(pushMock).toHaveBeenCalledWith('/admin/manage-users?tab=account');
+    expect(pushMock).toHaveBeenCalledWith('/admin/create-account');
   });
 });

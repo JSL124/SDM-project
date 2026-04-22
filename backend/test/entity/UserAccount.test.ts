@@ -26,12 +26,9 @@ describe('UserAccount', () => {
         rows: [{
           email: 'active.fundraiser@example.com',
           password: 'Fundraiser123!',
-          name: 'Active Fundraiser',
-          dob: '1998-01-01',
-          phone_num: '0412345678',
           profile_id: '1',
-          username: 'active-user',
           role: 'User admin',
+          account_status: 'ACTIVE',
         }],
         command: 'SELECT',
         rowCount: 1,
@@ -43,13 +40,10 @@ describe('UserAccount', () => {
 
       expect(account).not.toBeNull();
       expect(account).toBeInstanceOf(UserAccount);
-      expect(account?.getLoginUser()).toEqual({
-        email: 'active.fundraiser@example.com',
-        username: 'active-user',
-        role: 'User admin',
-      });
+      expect(account?.email).toBe('active.fundraiser@example.com');
+      expect(account?.role).toBe('User admin');
       expect(mockQuery).toHaveBeenCalledWith(
-        'SELECT email, password, name, dob, phone_num, profile_id, username, role FROM user_account WHERE email = $1',
+        'SELECT email, password, account_status, profile_id, role FROM user_account WHERE email = $1',
         ['active.fundraiser@example.com']
       );
     });
@@ -73,12 +67,9 @@ describe('UserAccount', () => {
         rows: [{
           email: 'active.fundraiser@example.com',
           password: 'Fundraiser123!',
-          name: 'Active Fundraiser',
-          dob: '1998-01-01',
-          phone_num: '0412345678',
           profile_id: '1',
-          username: 'active-user',
           role: 'Fundraiser',
+          account_status: 'ACTIVE',
         }],
         command: 'SELECT',
         rowCount: 1,
@@ -87,6 +78,26 @@ describe('UserAccount', () => {
       });
 
       const account = await UserAccount.login('active.fundraiser@example.com', 'WrongPassword!');
+
+      expect(account).toBeNull();
+    });
+
+    it('should return null when account is disabled', async () => {
+      mockQuery.mockResolvedValue({
+        rows: [{
+          email: 'disabled.fundraiser@example.com',
+          password: 'Disabled123!',
+          profile_id: '1',
+          role: 'Fundraiser',
+          account_status: 'DISABLED',
+        }],
+        command: 'SELECT',
+        rowCount: 1,
+        oid: 0,
+        fields: [],
+      });
+
+      const account = await UserAccount.login('disabled.fundraiser@example.com', 'Disabled123!');
 
       expect(account).toBeNull();
     });

@@ -301,7 +301,7 @@ describe('CreateFundraisingActivityPage', () => {
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/fundraiser/manage-activities');
+      expect(mockPush).toHaveBeenCalledWith('/fundraiser/view-fundraising-activity');
     });
   });
 
@@ -312,7 +312,7 @@ describe('CreateFundraisingActivityPage', () => {
     await user.click(screen.getByRole('button', { name: 'Close' }));
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/fundraiser/manage-activities');
+      expect(mockPush).toHaveBeenCalledWith('/fundraiser/view-fundraising-activity');
     });
   });
 });

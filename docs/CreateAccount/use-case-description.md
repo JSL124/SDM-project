@@ -21,7 +21,7 @@ The User Admin selects the "Create User Account" option from the system interfac
 - A corresponding user profile already exists.
 
 ## Normal Flow
-1. The user admin enters the account information: profile ID, username, password, and role.
+1. The user admin selects an existing profile and enters the account information: username, password, and role.
 2. The user admin clicks the Create button.
 3. The system validates the entered account information.
 4. The system checks whether the username already exists.

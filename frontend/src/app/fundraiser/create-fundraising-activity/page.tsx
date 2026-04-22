@@ -1,4 +1,4 @@
-import CreateFundraisingActivityPage from '@/feature/fundraising/boundary/CreateFundraisingActivityPage';
+import CreateFundraisingActivityPage from '@/feature/CreateFundraisingActivity/boundary/CreateFundraisingActivityPage';
 
 export default function FundraiserCreateFundraisingActivityPage() {
   return (

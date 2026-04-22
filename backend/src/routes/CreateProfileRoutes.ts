@@ -4,6 +4,16 @@ import { CreateProfileController } from '../CreateProfile/controller/CreateProfi
 const router = Router();
 const profileController = new CreateProfileController();
 
+router.get('/api/profile', async (_req: Request, res: Response) => {
+  try {
+    const profiles = await profileController.listProfiles();
+    res.json(profiles);
+  } catch (error) {
+    console.error('List profiles request failed:', error);
+    res.status(500).json([]);
+  }
+});
+
 router.post('/api/profile', async (req: Request, res: Response) => {
   try {
     const { role, description } = req.body;

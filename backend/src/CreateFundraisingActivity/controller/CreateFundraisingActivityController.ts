@@ -1,4 +1,4 @@
-import { FundraisingActivity } from '../entity/FundraisingActivity';
+import { FundraisingActivity } from '../../shared/entity/FundraisingActivity';
 
 export type CreateFundraisingActivityResult =
   | { success: true; message: 'Fundraising activity created successfully.' }

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { CreateFundraisingActivityController } from '../fundraising/controller/CreateFundraisingActivityController';
-import { ViewFundraisingActivitiesController } from '../fundraising/controller/ViewFundraisingActivitiesController';
+import { CreateFundraisingActivityController } from '../CreateFundraisingActivity/controller/CreateFundraisingActivityController';
+import { ViewFundraisingActivitiesController } from '../ViewFundraisingActivity/controller/ViewFundraisingActivitiesController';
 
 const router = Router();
 const createFundraisingActivityController = new CreateFundraisingActivityController();

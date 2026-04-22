@@ -1,7 +1,7 @@
-import { CreateFundraisingActivityController } from '../../src/fundraising/controller/CreateFundraisingActivityController';
-import { FundraisingActivity } from '../../src/fundraising/entity/FundraisingActivity';
+import { CreateFundraisingActivityController } from '../../src/CreateFundraisingActivity/controller/CreateFundraisingActivityController';
+import { FundraisingActivity } from '../../src/shared/entity/FundraisingActivity';
 
-jest.mock('../../src/fundraising/entity/FundraisingActivity');
+jest.mock('../../src/shared/entity/FundraisingActivity');
 
 const MockFundraisingActivity = FundraisingActivity as unknown as jest.Mock;
 

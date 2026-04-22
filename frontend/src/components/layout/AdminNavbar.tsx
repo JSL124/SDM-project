@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { consumeFlashBanner, queueFlashBanner } from '@/lib/flashBanner';
 import { logout } from '@/feature/Logout/boundary/LogoutPage';
@@ -9,7 +9,6 @@ import { hasRole } from '@/lib/auth';
 
 type StoredUser = {
   email: string;
-  username: string;
   role: string;
 };
 
@@ -19,7 +18,7 @@ type SuccessBanner = {
   durationMs: number;
 };
 
-const EMPTY_USER: StoredUser = { email: '', username: '', role: '' };
+const EMPTY_USER: StoredUser = { email: '', role: '' };
 let cachedUserSnapshot = EMPTY_USER;
 let cachedUserSnapshotKey = '';
 
@@ -30,16 +29,15 @@ function subscribeToStorage(callback: () => void) {
 
 function getStoredUser(): StoredUser {
   const email = localStorage.getItem('userEmail') ?? '';
-  const username = localStorage.getItem('userUsername') ?? '';
   const role = localStorage.getItem('userRole') ?? '';
-  const nextSnapshotKey = `${email}\u0000${username}\u0000${role}`;
+  const nextSnapshotKey = `${email}\u0000${role}`;
 
   if (nextSnapshotKey === cachedUserSnapshotKey) {
     return cachedUserSnapshot;
   }
 
   cachedUserSnapshotKey = nextSnapshotKey;
-  cachedUserSnapshot = { email, username, role };
+  cachedUserSnapshot = { email, role };
   return cachedUserSnapshot;
 }
 
@@ -68,9 +66,9 @@ function getInitialSuccessBanner(): SuccessBanner {
 
 export default function AdminNavbar() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const storedUser = useSyncExternalStore(subscribeToStorage, getStoredUser, getServerUser);
-  const activeTab = searchParams.get('tab') === 'profile' ? 'profile' : 'account';
+  const activeTab = pathname === '/admin/create-profile' ? 'profile' : 'account';
 
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -84,7 +82,7 @@ export default function AdminNavbar() {
     return () => clearTimeout(timer);
   }, [successBanner.durationMs, successBanner.isOpen]);
 
-  const displayName = storedUser.username.trim() || storedUser.email.split('@')[0]?.trim() || '';
+  const displayName = storedUser.email.split('@')[0]?.trim() || '';
   const avatarLetter = (displayName[0] ?? storedUser.email[0] ?? '?').toUpperCase();
 
   async function handleLogout(): Promise<void> {
@@ -99,12 +97,12 @@ export default function AdminNavbar() {
   }
 
   const isPlatformManager = hasRole(storedUser.role, 'Platform manager');
-  const homeHref = isPlatformManager ? '/admin/platform-management' : '/admin/manage-users?tab=account';
+  const homeHref = isPlatformManager ? '/admin/platform-management' : '/admin/create-account';
   const tabs: Array<{ key: 'account' | 'profile'; label: string; href: string }> = isPlatformManager
     ? []
     : [
-        { key: 'account', label: 'Account', href: '/admin/manage-users?tab=account' },
-        { key: 'profile', label: 'Profile', href: '/admin/manage-users?tab=profile' },
+        { key: 'account', label: 'Account', href: '/admin/create-account' },
+        { key: 'profile', label: 'Profile', href: '/admin/create-profile' },
       ];
 
   return (

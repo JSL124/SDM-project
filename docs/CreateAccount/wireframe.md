@@ -4,11 +4,11 @@
 Create Account Page
 
 ## Purpose
-Allow a user admin to enter a profile ID and account details, then submit the account for creation.
+Allow a user admin to select an existing profile and enter account details, then submit the account for creation.
 
 ## Main UI Elements
 - Page title: `Create User Account`
-- Profile ID input field
+- Profile dropdown populated from existing profiles
 - Username input field
 - Password input field
 - Role select field
@@ -21,8 +21,8 @@ Allow a user admin to enter a profile ID and account details, then submit the ac
 +--------------------------------------------------+
 |               Create User Account                |
 |--------------------------------------------------|
-| Profile ID                                       |
-| [______________________________________________] |
+| Profile                                          |
+| [ Select a profile                            v ]|
 |                                                  |
 | Username                                         |
 | [______________________________________________] |
@@ -40,7 +40,7 @@ Allow a user admin to enter a profile ID and account details, then submit the ac
 ```
 
 ## Boundary Responsibilities Reflected in the Wireframe
-- Collect profile ID, username, password, and role input
+- Collect the selected profile, username, password, and role input
 - Validate that all fields are filled before backend call
 - Show error messages in the status area
 - Show success feedback when the account is created
