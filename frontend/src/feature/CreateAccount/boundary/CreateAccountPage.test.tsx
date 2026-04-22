@@ -74,11 +74,28 @@ describe('CreateAccountPage', () => {
     return fetchMock.mock.calls.filter(([input]) => String(input) === getApiUrl('/api/account'));
   }
 
-  async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
+  function formatDateInputValue(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  function getTodayDateString(): string {
+    return formatDateInputValue(new Date());
+  }
+
+  function getLatestAllowedDobDateString(): string {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return formatDateInputValue(yesterday);
+  }
+
+  async function fillValidForm(user: ReturnType<typeof userEvent.setup>, DOB = '1998-01-01') {
     await user.type(screen.getByLabelText('Email'), 'new.user@example.com');
     await user.type(screen.getByLabelText('Password'), 'Password123!');
     await user.type(screen.getByLabelText('Name'), 'New User');
-    fireEvent.change(screen.getByLabelText('DOB'), { target: { value: '1998-01-01' } });
+    fireEvent.change(screen.getByLabelText('DOB'), { target: { value: DOB } });
     await user.type(screen.getByLabelText('Phone Number'), '0498765432');
     await screen.findByRole('option', { name: 'Donee' });
     await user.selectOptions(screen.getByLabelText('Profile'), '1');
@@ -105,6 +122,7 @@ describe('CreateAccountPage', () => {
     expect(screen.getByLabelText('Name')).toBeInTheDocument();
     expect(screen.getByLabelText('DOB')).toBeInTheDocument();
     expect(screen.getByLabelText('DOB')).toHaveAttribute('type', 'date');
+    expect(screen.getByLabelText('DOB')).toHaveAttribute('max', getLatestAllowedDobDateString());
     expect(screen.getByLabelText('Phone Number')).toBeInTheDocument();
     expect(screen.getByLabelText('Profile')).toBeInTheDocument();
   });
@@ -143,6 +161,17 @@ describe('CreateAccountPage', () => {
     await user.click(screen.getByRole('button', { name: 'Create' }));
 
     expect(screen.getByText('Please enter a DOB.')).toBeInTheDocument();
+    expect(getAccountRequests()).toHaveLength(0);
+  });
+
+  it('blocks submission when DOB is today', async () => {
+    const user = userEvent.setup();
+    render(<CreateAccountPage />);
+
+    await fillValidForm(user, getTodayDateString());
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    expect(screen.getByText('Please select a DOB before today.')).toBeInTheDocument();
     expect(getAccountRequests()).toHaveLength(0);
   });
 

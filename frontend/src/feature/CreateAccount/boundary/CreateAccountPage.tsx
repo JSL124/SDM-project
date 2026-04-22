@@ -24,6 +24,19 @@ const initialStatus: AccountStatus = {
   result: null,
 };
 
+function formatDateInputValue(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getLatestAllowedDobDateString(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return formatDateInputValue(yesterday);
+}
+
 export default function CreateAccountPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,6 +50,7 @@ export default function CreateAccountPage() {
   const [status, setStatus] = useState<AccountStatus>(initialStatus);
 
   const isSuccess = status.result?.success;
+  const latestAllowedDobDate = getLatestAllowedDobDateString();
 
   useEffect(() => {
     let isMounted = true;
@@ -118,6 +132,11 @@ export default function CreateAccountPage() {
       return false;
     }
 
+    if (DOB > latestAllowedDobDate) {
+      displayError('Please select a DOB before today.');
+      return false;
+    }
+
     if (!phoneNum.trim()) {
       displayError('Please enter a phone number.');
       return false;
@@ -156,6 +175,7 @@ export default function CreateAccountPage() {
       </p>
 
       <form
+        noValidate
         onSubmit={(event) => {
           event.preventDefault();
           if (!validateInput(email, password, name, DOB, phoneNum, profileId)) {
@@ -234,6 +254,7 @@ export default function CreateAccountPage() {
             id="DOB"
             type="date"
             value={DOB}
+            max={latestAllowedDobDate}
             onChange={(event) => setDOB(event.target.value)}
             placeholder="Enter DOB"
             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"

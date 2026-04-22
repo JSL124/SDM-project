@@ -15,7 +15,7 @@ describe('UserAccount - Create Account methods', () => {
   describe('createAccount', () => {
     it('should return UserAccount on successful insert', async () => {
       mockQuery.mockResolvedValue({
-        rows: [],
+        rows: [{ role: 'Fundraiser' }],
         command: 'INSERT',
         rowCount: 1,
         oid: 0,
@@ -27,8 +27,8 @@ describe('UserAccount - Create Account methods', () => {
       expect(account).not.toBeNull();
       expect(account).toBeInstanceOf(UserAccount);
       expect(mockQuery).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO user_account (email, password, profile_id, role)'),
-        ['new.user@example.com', 'Password123!', '1']
+        expect.stringContaining('INSERT INTO user_account (email, password, name, dob, phone_num, profile_id, role)'),
+        ['new.user@example.com', 'Password123!', 'New User', '1998-01-01', '0498765432', '1']
       );
     });
 

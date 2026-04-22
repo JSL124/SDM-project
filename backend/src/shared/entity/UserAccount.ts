@@ -45,17 +45,18 @@ export class UserAccount {
   static async createAccount(email: string, password: string, name: string, DOB: string, phoneNum: string, profileId: string): Promise<UserAccount | null> {
     try {
       const sql = `
-        INSERT INTO user_account (email, password, profile_id, role)
-        SELECT $1, $2, profile_id, role
+        INSERT INTO user_account (email, password, name, dob, phone_num, profile_id, role)
+        SELECT $1, $2, $3, $4, $5, profile_id, role
         FROM user_profile
-        WHERE profile_id = $3
+        WHERE profile_id = $6
+        RETURNING role
       `;
-      const result = await query(sql, [email, password, profileId]);
+      const result = await query(sql, [email, password, name, DOB, phoneNum, profileId]);
       if (result.rowCount === 0) {
         return null;
       }
 
-      return new UserAccount(email, password, name, DOB, phoneNum, profileId);
+      return new UserAccount(email, password, name, DOB, phoneNum, profileId, result.rows[0]?.role ?? '');
     } catch {
       return null;
     }
