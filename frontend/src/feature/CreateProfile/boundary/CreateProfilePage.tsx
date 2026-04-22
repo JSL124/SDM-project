@@ -66,6 +66,22 @@ export default function CreateProfilePage() {
     });
   }
 
+  function validateInput(role: string, description: string): boolean {
+    if (!role.trim()) {
+      errorMessageRef.current = 'Please enter a role.';
+      displayError();
+      return false;
+    }
+
+    if (!description.trim()) {
+      errorMessageRef.current = 'Please enter a description.';
+      displayError();
+      return false;
+    }
+
+    return true;
+  }
+
   if (!authorized) {
     return (
       <div className="mx-auto w-full max-w-md rounded-2xl bg-white px-8 py-10 text-center shadow-xl">
@@ -118,15 +134,7 @@ export default function CreateProfilePage() {
         onSubmit={(event) => {
           event.preventDefault();
 
-          if (!role.trim()) {
-            errorMessageRef.current = 'Please enter a role.';
-            displayError();
-            return;
-          }
-
-          if (!description.trim()) {
-            errorMessageRef.current = 'Please enter a description.';
-            displayError();
+          if (!validateInput(role, description)) {
             return;
           }
 

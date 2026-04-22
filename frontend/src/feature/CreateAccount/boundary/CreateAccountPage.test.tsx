@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateAccountPage from './CreateAccountPage';
 import { getApiUrl } from '@/lib/api';
@@ -70,11 +70,15 @@ describe('CreateAccountPage', () => {
     });
   }
 
+  function getAccountRequests() {
+    return fetchMock.mock.calls.filter(([input]) => String(input) === getApiUrl('/api/account'));
+  }
+
   async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
     await user.type(screen.getByLabelText('Email'), 'new.user@example.com');
     await user.type(screen.getByLabelText('Password'), 'Password123!');
     await user.type(screen.getByLabelText('Name'), 'New User');
-    await user.type(screen.getByLabelText('DOB'), '1998-01-01');
+    fireEvent.change(screen.getByLabelText('DOB'), { target: { value: '1998-01-01' } });
     await user.type(screen.getByLabelText('Phone Number'), '0498765432');
     await screen.findByRole('option', { name: 'Donee' });
     await user.selectOptions(screen.getByLabelText('Profile'), '1');
@@ -100,38 +104,62 @@ describe('CreateAccountPage', () => {
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
     expect(screen.getByLabelText('Name')).toBeInTheDocument();
     expect(screen.getByLabelText('DOB')).toBeInTheDocument();
+    expect(screen.getByLabelText('DOB')).toHaveAttribute('type', 'date');
     expect(screen.getByLabelText('Phone Number')).toBeInTheDocument();
     expect(screen.getByLabelText('Profile')).toBeInTheDocument();
   });
 
-  it('sends the entered payload without client-side validation', async () => {
+  it('blocks submission when email format is invalid', async () => {
     const user = userEvent.setup();
-    mockFetchResponses({
-      accountOk: false,
-      accountResponse: {
-        success: false,
-        message: 'User Account exists.',
-      },
-    });
     render(<CreateAccountPage />);
 
     await user.type(screen.getByLabelText('Email'), 'not-an-email');
     await user.click(screen.getByRole('button', { name: 'Create' }));
 
-    await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith(getApiUrl('/api/account'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: 'not-an-email',
-          password: '',
-          name: '',
-          DOB: '',
-          phoneNum: '',
-          profileId: '',
-        }),
-      });
-    });
+    expect(screen.getByText('Please enter a valid email address.')).toBeInTheDocument();
+    expect(getAccountRequests()).toHaveLength(0);
+  });
+
+  it('blocks submission when required fields are empty', async () => {
+    const user = userEvent.setup();
+    render(<CreateAccountPage />);
+
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    expect(screen.getByText('Please enter an email.')).toBeInTheDocument();
+    expect(getAccountRequests()).toHaveLength(0);
+  });
+
+  it('blocks submission when DOB is empty', async () => {
+    const user = userEvent.setup();
+    render(<CreateAccountPage />);
+
+    await user.type(screen.getByLabelText('Email'), 'new.user@example.com');
+    await user.type(screen.getByLabelText('Password'), 'Password123!');
+    await user.type(screen.getByLabelText('Name'), 'New User');
+    await user.type(screen.getByLabelText('Phone Number'), '0498765432');
+    await screen.findByRole('option', { name: 'Donee' });
+    await user.selectOptions(screen.getByLabelText('Profile'), '1');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    expect(screen.getByText('Please enter a DOB.')).toBeInTheDocument();
+    expect(getAccountRequests()).toHaveLength(0);
+  });
+
+  it('blocks submission when profile is not selected', async () => {
+    const user = userEvent.setup();
+    render(<CreateAccountPage />);
+
+    await user.type(screen.getByLabelText('Email'), 'new.user@example.com');
+    await user.type(screen.getByLabelText('Password'), 'Password123!');
+    await user.type(screen.getByLabelText('Name'), 'New User');
+    fireEvent.change(screen.getByLabelText('DOB'), { target: { value: '1998-01-01' } });
+    await user.type(screen.getByLabelText('Phone Number'), '0498765432');
+    await screen.findByRole('option', { name: 'Donee' });
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    expect(screen.getByText('Please select a profile.')).toBeInTheDocument();
+    expect(getAccountRequests()).toHaveLength(0);
   });
 
   it('loads profile options for the dropdown', async () => {

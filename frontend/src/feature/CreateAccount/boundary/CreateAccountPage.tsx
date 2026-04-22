@@ -91,6 +91,46 @@ export default function CreateAccountPage() {
     });
   }
 
+  function validateInput(email: string, password: string, name: string, DOB: string, phoneNum: string, profileId: string): boolean {
+    if (!email.trim()) {
+      displayError('Please enter an email.');
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      displayError('Please enter a valid email address.');
+      return false;
+    }
+
+    if (!password.trim()) {
+      displayError('Please enter a password.');
+      return false;
+    }
+
+    if (!name.trim()) {
+      displayError('Please enter a name.');
+      return false;
+    }
+
+    if (!DOB.trim()) {
+      displayError('Please enter a DOB.');
+      return false;
+    }
+
+    if (!phoneNum.trim()) {
+      displayError('Please enter a phone number.');
+      return false;
+    }
+
+    if (!profileId.trim()) {
+      displayError('Please select a profile.');
+      return false;
+    }
+
+    return true;
+  }
+
   const message = status.submitted ? status.result?.message : '';
 
   if (isSuccess) {
@@ -118,6 +158,10 @@ export default function CreateAccountPage() {
       <form
         onSubmit={(event) => {
           event.preventDefault();
+          if (!validateInput(email, password, name, DOB, phoneNum, profileId)) {
+            return;
+          }
+
           void (async () => {
             try {
               const response = await fetch(getApiUrl('/api/account'), {
@@ -188,7 +232,7 @@ export default function CreateAccountPage() {
           </label>
           <input
             id="DOB"
-            type="text"
+            type="date"
             value={DOB}
             onChange={(event) => setDOB(event.target.value)}
             placeholder="Enter DOB"
